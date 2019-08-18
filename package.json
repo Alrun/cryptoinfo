@@ -2,7 +2,7 @@
   "name": "cryptoinfo",
   "version": "0.1.0",
   "private": true,
-  "homepage": "./build",
+  "main": "./build",
   "dependencies": {
     "@material-ui/core": "^4.3.2"
   },
