@@ -1,15 +1,13 @@
 {
   "files": {
-    "main.css": "/cryptoinfo/static/css/main.9f2dc881.chunk.css",
-    "main.js": "/cryptoinfo/static/js/main.2a26d77f.chunk.js",
-    "main.js.map": "/cryptoinfo/static/js/main.2a26d77f.chunk.js.map",
+    "main.js": "/cryptoinfo/static/js/main.e25d9229.chunk.js",
+    "main.js.map": "/cryptoinfo/static/js/main.e25d9229.chunk.js.map",
     "runtime~main.js": "/cryptoinfo/static/js/runtime~main.48a6182d.js",
     "runtime~main.js.map": "/cryptoinfo/static/js/runtime~main.48a6182d.js.map",
-    "static/js/2.97fb7bfd.chunk.js": "/cryptoinfo/static/js/2.97fb7bfd.chunk.js",
-    "static/js/2.97fb7bfd.chunk.js.map": "/cryptoinfo/static/js/2.97fb7bfd.chunk.js.map",
+    "static/js/2.dc2538b6.chunk.js": "/cryptoinfo/static/js/2.dc2538b6.chunk.js",
+    "static/js/2.dc2538b6.chunk.js.map": "/cryptoinfo/static/js/2.dc2538b6.chunk.js.map",
     "index.html": "/cryptoinfo/index.html",
-    "precache-manifest.35ce07a72040d37901d6e57804284486.js": "/cryptoinfo/precache-manifest.35ce07a72040d37901d6e57804284486.js",
-    "service-worker.js": "/cryptoinfo/service-worker.js",
-    "static/css/main.9f2dc881.chunk.css.map": "/cryptoinfo/static/css/main.9f2dc881.chunk.css.map"
+    "precache-manifest.4e2808a69a4ee72fc5888859b2f03365.js": "/cryptoinfo/precache-manifest.4e2808a69a4ee72fc5888859b2f03365.js",
+    "service-worker.js": "/cryptoinfo/service-worker.js"
   }
 }
