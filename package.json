@@ -3,10 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "https://alrun.github.io/cryptoinfo",
+  "scripts": {
+    "dev": "node scripts/start.js",
+    "build": "node scripts/build.js",
+    "test": "node scripts/test.js",
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build"
+  },
   "dependencies": {
     "@material-ui/core": "^4.3.2",
     "@material-ui/icons": "^4.2.1",
-    "gh-pages": "^2.1.1"
+    "axios": "^0.19.0",
+    "gh-pages": "^2.1.1",
+    "source-map-explorer": "^2.0.1"
   },
   "devDependencies": {
     "@babel/core": "7.5.5",
@@ -64,13 +74,6 @@
     "webpack-dev-server": "3.2.1",
     "webpack-manifest-plugin": "2.0.4",
     "workbox-webpack-plugin": "4.3.1"
-  },
-  "scripts": {
-    "dev": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js",
-    "predeploy": "yarn build",
-    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
