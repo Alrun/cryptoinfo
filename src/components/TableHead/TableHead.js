@@ -1,62 +1,43 @@
-// import TableRow from '../TableRow/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import PropTypes from 'prop-types';
-import React from 'react';
-import TableRow from '@material-ui/core/TableRow';
-import {default as TH} from '@material-ui/core/TableHead';
+import React, { useContext } from 'react';
+import { StoreContext } from '../../context';
+import { sortItems } from '../../context/actions';
 
-const headRows = [
-  {id: 'name', numeric: false, disablePadding: true, label: 'Dessert (100g serving)'},
-  {id: 'calories', numeric: true, disablePadding: false, label: 'Calories'},
-  {id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)'},
-  {id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)'},
-  {id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)'},
+const head = [
+  {id: 'title', title: 'Coin'},
+  {id: 'quantity', title: 'Quantity'},
+  {id: 'buyPrice', title: 'Buy Price'},
+  {id: 'price', title: 'Current Price'},
+  {id: 'profit', title: 'Profit'},
+  {id: 'gain', title: 'Gain'},
+  {id: 'val', title: 'Value'},
+  {id: 'wallet', title: 'Wallet'},
 ];
 
-export default function TableHead({order, orderBy, classes, onRequestSort}) {
-// function EnhancedTableHead(props) {
-//   const {classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort} = props;
-  const createSortHandler = property => event => {
-    onRequestSort(event, property);
-  };
+export default function TableHead(props) {
+  const {state, dispatch} = useContext(StoreContext);
+
+
 
   return (
-    <TH>
-      <TableRow>
-        { headRows.map(row => (
-          <TableCell
-            scope="row"
-            key={ row.id }
-            align={ row.numeric ? 'right' : 'left' }
-            // padding={ row.disablePadding ? 'none' : 'default' }
-            sortDirection={ orderBy === row.id ? order : false }
+    <div style={ {display: 'flex', padding: '10px 0'} }>
+      {
+        head.map(item => (
+          <div
+            style={ {width: 120, fontWeight: 'bold'} }
+            key={ Math.random() }
+            onClick={ () => dispatch(sortItems(item.id)) }
           >
-            <TableSortLabel
-              active={ orderBy === row.id }
-              direction={ order }
-              onClick={ createSortHandler(row.id) }
-            >
-              { row.label }
-              { orderBy === row.id ? (
-                <span className={ classes.visuallyHidden }>
-                  { order === 'desc' ? 'sorted descending' : 'sorted ascending' }
-                </span>
-              ) : null }
-            </TableSortLabel>
-          </TableCell>
-        )) }
-      </TableRow>
-    </TH>
+            { item.title }
+            {state.sortBy === item.id
+            && <div style={{display: 'inline-block', marginLeft: 5}}>
+              {state.sortDesc
+              ? '↓'
+              : '↑'}
+            </div>}
+
+          </div>
+        ))
+      }
+    </div>
   );
 }
-
-// EnhancedTableHead.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   numSelected: PropTypes.number.isRequired,
-//   onRequestSort: PropTypes.func.isRequired,
-//   onSelectAllClick: PropTypes.func.isRequired,
-//   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-//   orderBy: PropTypes.string.isRequired,
-//   rowCount: PropTypes.number.isRequired,
-// };

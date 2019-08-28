@@ -1,24 +1,19 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
-import {default as TR} from '@material-ui/core/TableRow';
 
-export default function TableRow({rowData: {labelId, row}}) {
+export default function TableRow(props) {
+  const {title, buyPrice, price, quantity, buyFee, sellFee, wallet} = props.data;
+
   return (
-    <TR
-      tabIndex={ -1 }
-    >
-      <TableCell
-        component="th"
-        id={ labelId }
-        scope="row"
-      >
-        { row.name }
-      </TableCell>
-      <TableCell align="right">{ row.calories }</TableCell>
-      <TableCell align="right">{ row.fat }</TableCell>
-      <TableCell align="right">{ row.carbs }</TableCell>
-      <TableCell align="right">{ row.protein }</TableCell>
-      <TableCell align="right" padding="none">...</TableCell>
-    </TR>
-  );
+    <div style={{display: 'flex'}}>
+      <div style={{width: 120}}>{title}</div>
+      <div style={{width: 120}}>{quantity}</div>
+      <div style={{width: 120}}>{buyPrice}</div>
+      <div style={{width: 120}}>{price}</div>
+      <div style={{width: 120}}>{title}</div>
+      <div style={{width: 120}}>{title}</div>
+      <div style={{width: 120}}>{title}</div>
+      <div style={{width: 120}}>{Array.isArray(wallet) ? wallet.join(', ') : wallet}</div>
+      <div>{buyFee} / {sellFee}</div>
+    </div>
+  )
 }
