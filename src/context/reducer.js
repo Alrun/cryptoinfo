@@ -1,5 +1,5 @@
 export const initialState = {
-  currency: 'usd',
+  fiat: 'btc',
   sortBy: 'title',
   sortDesc: false,
   tableData: [],
@@ -11,7 +11,9 @@ export const initialState = {
   market: {
     isLoading: false,
     error: '',
-    data: []
+    data: [],
+    priceBtc: 0,
+    priceUsdt: 0,
   }
 };
 
@@ -50,6 +52,8 @@ export const reducer = (state, action) => {
         ...state,
         market: {
           ...state.market,
+          priceBtc: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'btc')[0].price,
+          priceUsdt: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'usdt')[0].price,
           data: action.data
         }
       };
@@ -75,7 +79,7 @@ export const reducer = (state, action) => {
       case 'SET_CURRENCY':
       return {
         ...state,
-        currency: action.cur
+        fiat: action.cur
       };
 
       case 'SET_TABLE_DATA':
