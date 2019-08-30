@@ -44,7 +44,7 @@ export const reducer = (state, action) => {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          error: action.err
+          error: action.msg
         }
       };
     case 'MARKET_FETCH_SUCCESS':
@@ -72,7 +72,7 @@ export const reducer = (state, action) => {
         ...state,
         market: {
           ...state.market,
-          error: action.err
+          error: action.msg
         }
       };
 

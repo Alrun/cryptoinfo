@@ -40,8 +40,8 @@ export default function TableContainer() {
 
         dispatch(spreadsheetFetchSuccess(spreadsheetData));
       } catch (err) {
-        dispatch(spreadsheetError(err));
-        console.error(err);
+        dispatch(spreadsheetError(err.message));
+        console.error(err.message);
       }
 
       dispatch(spreadsheetLoading(false));
@@ -273,7 +273,7 @@ export default function TableContainer() {
   }
 
   if (state.spreadsheet.error) {
-    return (<div>{ state.table.error }</div>);
+    return (<div>{ state.spreadsheet.error }</div>);
   }
 
   return (
