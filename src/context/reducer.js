@@ -1,3 +1,5 @@
+import {C} from './actions';
+
 export const initialState = {
   fiat: 'btc',
   sortBy: 'title',
@@ -21,25 +23,27 @@ export const reducer = (state, action) => {
   console.log('action ', action);
 
   switch (action.type) {
-    case 'SPREADSHEET_FETCH_SUCCESS':
+    case C.SPREADSHEET_FETCH_SUCCESS:
       return {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          data: action.data
+          data: action.data,
+          error: ''
         }
       };
 
-    case 'SPREADSHEET_LOADING':
+    case C.SPREADSHEET_LOADING:
       return {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          isLoading: action.bool
+          isLoading: action.bool,
+          error: ''
         }
       };
 
-    case 'SPREADSHEET_ERROR':
+    case C.SPREADSHEET_ERROR:
       return {
         ...state,
         spreadsheet: {
@@ -47,27 +51,29 @@ export const reducer = (state, action) => {
           error: action.msg
         }
       };
-    case 'MARKET_FETCH_SUCCESS':
+    case C.MARKET_FETCH_SUCCESS:
       return {
         ...state,
         market: {
           ...state.market,
           priceBtc: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'btc')[0].price,
           priceUsdt: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'usdt')[0].price,
-          data: action.data
+          data: action.data,
+          error: ''
         }
       };
 
-    case 'MARKET_LOADING':
+    case C.MARKET_LOADING:
       return {
         ...state,
         market: {
           ...state.market,
-          isLoading: action.bool
+          isLoading: action.bool,
+          error: ''
         }
       };
 
-    case 'MARKET_ERROR':
+    case C.MARKET_ERROR:
       return {
         ...state,
         market: {
@@ -76,19 +82,19 @@ export const reducer = (state, action) => {
         }
       };
 
-      case 'SET_CURRENCY':
+      case C.SET_CURRENCY:
       return {
         ...state,
         fiat: action.cur
       };
 
-      case 'SET_TABLE_DATA':
+      case C.SET_TABLE_DATA:
       return {
         ...state,
         tableData: action.data
       };
 
-    case 'SORT_ITEMS':
+    case C.SORT_ITEMS:
       return {
         ...state,
         sortBy: state.sortBy === action.sortBy ? state.sortBy : action.sortBy,
