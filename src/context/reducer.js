@@ -1,10 +1,12 @@
-import {C} from './actions';
+import { C } from './actions';
 
 export const initialState = {
   fiat: 'btc',
   sortBy: 'title',
   sortDesc: false,
   tableData: [],
+  groupOpenAll: false,
+  groupOpen: [],
   spreadsheet: {
     isLoading: false,
     error: '',
@@ -82,13 +84,13 @@ export const reducer = (state, action) => {
         }
       };
 
-      case C.SET_CURRENCY:
+    case C.SET_CURRENCY:
       return {
         ...state,
         fiat: action.cur
       };
 
-      case C.SET_TABLE_DATA:
+    case C.SET_TABLE_DATA:
       return {
         ...state,
         tableData: action.data
@@ -100,6 +102,30 @@ export const reducer = (state, action) => {
         sortBy: state.sortBy === action.sortBy ? state.sortBy : action.sortBy,
         sortDesc: state.sortBy !== action.sortBy ? state.sortDesc : !state.sortDesc
       };
+
+    case C.GROUP_OPEN_TOGGLE:
+      return {
+        ...state,
+        groupOpen: state.groupOpen.find(id => id === action.id)
+                   ? state.groupOpen.filter(item => item !== action.id)
+                   : state.groupOpen.concat(action.id)
+      };
+
+    case C.GROUP_OPEN_ALL:
+      return {
+        ...state,
+        groupOpenAll: action.bool,
+        groupOpen: action.bool
+                   ? state.groupOpen
+                   : []
+      };
+
+    // case C.GROUP_CLOSE_ALL:
+    //   return {
+    //     ...state,
+    //     groupOpenAll: action.bool,
+    //     groupOpen: []
+    //   };
 
     default:
       return state;

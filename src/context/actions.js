@@ -7,7 +7,9 @@ export const C = {
   MARKET_ERROR: 'MARKET_ERROR',
   SORT_ITEMS: 'SORT_ITEMS',
   SET_TABLE_DATA: 'SET_TABLE_DATA',
-  SET_CURRENCY: 'SET_CURRENCY'
+  SET_CURRENCY: 'SET_CURRENCY',
+  GROUP_OPEN_TOGGLE: 'GROUP_OPEN_TOGGLE',
+  GROUP_OPEN_ALL: 'GROUP_OPEN_ALL'
 };
 
 export const spreadsheetFetchSuccess = data => ({
@@ -53,4 +55,14 @@ export const setTableData = data => ({
 export const sortItems = sortBy => ({
   type: C.SORT_ITEMS,
   sortBy
+});
+
+export const groupOpenToggle = id => ({
+  type: C.GROUP_OPEN_TOGGLE,
+  id
+});
+
+export const groupOpenAll = bool => ({
+  type: C.GROUP_OPEN_ALL,
+  bool
 });

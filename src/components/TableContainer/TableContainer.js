@@ -117,7 +117,6 @@ export default function TableContainer() {
     });
 
     const rawDataExtended = rawData.map(item => {
-
       const calcProfit = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
         return priceSell * quantity - priceBuy * quantity - (quantity / 100 * buyFee + quantity) / 100 * buyFee * priceBuy - quantity / 100 * sellFee * priceSell;
       };
@@ -277,9 +276,7 @@ export default function TableContainer() {
   }
 
   return (
-    <div>
-      <Table />
-    </div>
+    <Table />
   );
 }
 
