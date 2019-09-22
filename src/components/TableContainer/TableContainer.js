@@ -11,7 +11,7 @@ import {
   marketError,
   setTableData
 } from '../../context/actions';
-import { sortStr } from '../../utilites';
+import { sortStr } from '../../utils';
 
 import Table from '../Table';
 
@@ -37,7 +37,6 @@ export default function TableContainer() {
       try {
         const response = await axios.get(`https://spreadsheets.google.com/feeds/list/${ SPREADSHEET_ADDRESS }/od6/public/values?alt=json`);
         const spreadsheetData = schemaSpreadsheet(response.data.feed.entry);
-
         dispatch(spreadsheetFetchSuccess(spreadsheetData));
       } catch (err) {
         dispatch(spreadsheetError(err.message));
@@ -76,9 +75,27 @@ export default function TableContainer() {
 
       try {
         const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ MARKET_KEY }&label=${ coinList }&fiat=${ fiat }`);
-        const marketData = schemaMarket(response.data.Markets);
+        // const marketData = schemaMarket(response.data.Markets);
 
-        dispatch(marketFetchSuccess(marketData));
+        console.log('resp ', coinList, fiat);
+
+        if (!!response.data.Markets) {
+          dispatch(marketFetchSuccess(schemaMarket(response.data.Markets)));
+        } else {
+          dispatch(marketFetchSuccess(
+            coinList.split('-').map(item => (
+              {
+                title: '',
+                label: item.replace(/(btc)$/, '/$1').toUpperCase(),
+                price: 0
+              }
+            ))
+          ));
+
+          dispatch(marketError(response.data.error));
+        }
+
+        // dispatch(marketFetchSuccess(marketData));
       } catch (err) {
         dispatch(marketError(err));
         console.error(err);
@@ -129,23 +146,24 @@ export default function TableContainer() {
         ...item,
         buyPrice: state.fiat === 'btc'
                   ? item.title.toLowerCase() === 'btc'
-                    ? item.buyPrice / state.market.priceBtc
+                    ? !!state.market.priceBtc ? item.buyPrice / state.market.priceBtc : 1
                     : item.buyPrice
                   : item.title.toLowerCase() === 'btc'
-                    ? item.buyPrice * state.market.priceUsdt
-                    : item.buyPrice * state.market.priceBtc,
+                    ? !!state.market.priceBtc ? item.buyPrice * state.market.priceUsdt : NaN
+                    : !!state.market.priceBtc ? item.buyPrice * state.market.priceBtc : NaN,
         price: state.fiat === 'btc'
-               ? item.title.toLowerCase() === 'btc'
-                 ? 1
-                 : item.price / state.market.priceBtc
-               : item.price,
-        profit: state.fiat === 'btc'
-                ? item.title.toLowerCase() === 'btc'
-                  ? calcProfit(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
-                  : calcProfit(item.price / state.market.priceBtc, item.buyPrice, item.quantity, item.buyFee, item.sellFee)
-                : item.title.toLowerCase() === 'btc'
-                  ? calcProfit(item.price, item.buyPrice * state.market.priceUsdt, item.quantity, item.buyFee, item.sellFee)
-                  : calcProfit(item.price, item.buyPrice * state.market.priceBtc, item.quantity, item.buyFee, item.sellFee),
+               ? !!state.market.priceBtc ? item.price / state.market.priceBtc : NaN
+               : !!state.market.priceBtc ? item.price : NaN,
+        profit: state.market.priceBtc
+                ? state.fiat === 'btc'
+
+                  ? item.title.toLowerCase() === 'btc'
+                    ? calcProfit(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
+                    : calcProfit(item.price / state.market.priceBtc, item.buyPrice, item.quantity, item.buyFee, item.sellFee)
+                  : item.title.toLowerCase() === 'btc'
+                    ? calcProfit(item.price, item.buyPrice * state.market.priceUsdt, item.quantity, item.buyFee, item.sellFee)
+                    : calcProfit(item.price, item.buyPrice * state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
+                : NaN,
         gain: state.fiat === 'btc'
               ? item.title.toLowerCase() === 'btc'
                 ? calcGain(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity)
@@ -153,9 +171,11 @@ export default function TableContainer() {
               : item.title.toLowerCase() === 'btc'
                 ? calcGain(item.price, item.buyPrice * state.market.priceUsdt, item.quantity)
                 : calcGain(item.price, item.buyPrice * state.market.priceBtc, item.quantity),
-        val: state.fiat === 'btc'
-             ? item.price / state.market.priceBtc * item.quantity
-             : item.price * item.quantity
+        val: state.market.priceBtc
+             ? state.fiat === 'btc'
+               ? item.price / state.market.priceBtc * item.quantity
+               : item.price * item.quantity
+             : NaN
       };
     });
 
@@ -200,11 +220,11 @@ export default function TableContainer() {
               groupArr.push(item);
               sum.buyPrice += item.buyPrice * item.quantity;
               sum.quantity += item.quantity;
-              sum.feeBuy += item.feeBuy;
-              sum.feeSell += item.feeSell;
-              sum.val += item.val;
               sum.profit += item.profit;
               sum.gain += item.gain * item.quantity;
+              sum.val += item.val;
+              sum.feeBuy += item.feeBuy;
+              sum.feeSell += item.feeSell;
             }
           });
 
@@ -228,9 +248,11 @@ export default function TableContainer() {
             buyPrice: sum.buyPrice / sum.quantity,
             quantity: sum.quantity,
             val: sum.val,
-            price: state.fiat === 'btc'
-                   ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price / state.market.priceBtc
-                   : market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price,
+            price: !!state.market.priceBtc
+                   ? state.fiat === 'btc'
+                     ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price / state.market.priceBtc
+                     : market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price
+                   : NaN,
             profit: sum.profit,
             gain: sum.gain / sum.quantity,
             wallet: walletList.join(', '),
@@ -267,22 +289,7 @@ export default function TableContainer() {
     state.market.data.length
   ]);
 
-  if (state.spreadsheet.isLoading) {
-    return (<div>Loading...</div>);
-  }
-
-  if (state.spreadsheet.error) {
-    return (<div>{ state.spreadsheet.error }</div>);
-  }
-
   return (
     <Table />
   );
 }
-
-
-// function dateToTimestamp(str) {
-//   return Date.parse(str
-//     .replace(/(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1')
-//     .replace(/\s/, 'T'));
-// }

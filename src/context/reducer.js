@@ -2,6 +2,7 @@ import { C } from './actions';
 
 export const initialState = {
   fiat: 'btc',
+  fiatSymbol: '₿',
   sortBy: 'title',
   sortDesc: false,
   tableData: [],
@@ -40,8 +41,7 @@ export const reducer = (state, action) => {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          isLoading: action.bool,
-          error: ''
+          isLoading: action.bool
         }
       };
 
@@ -53,7 +53,9 @@ export const reducer = (state, action) => {
           error: action.msg
         }
       };
+
     case C.MARKET_FETCH_SUCCESS:
+      console.log('action market ', action.data);
       return {
         ...state,
         market: {
@@ -70,8 +72,7 @@ export const reducer = (state, action) => {
         ...state,
         market: {
           ...state.market,
-          isLoading: action.bool,
-          error: ''
+          isLoading: action.bool
         }
       };
 
@@ -87,7 +88,19 @@ export const reducer = (state, action) => {
     case C.SET_CURRENCY:
       return {
         ...state,
-        fiat: action.cur
+        fiat: action.cur,
+        fiatSymbol: (() => {
+          switch (action.cur) {
+            case 'rur':
+              return '₽';
+            case 'usdt':
+              return '$';
+            case 'eur':
+              return '€';
+            default:
+              return '₿';
+          }
+        })()
       };
 
     case C.SET_TABLE_DATA:

@@ -1,11 +1,12 @@
 import React from 'react';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
 
 import Switch from '../Switch';
 import TableContainer from '../TableContainer';
 import SelectCurrency from '../SelectCurrency';
-import { makeStyles } from '@material-ui/core/styles';
+import PieChartContainer from '../PieChartContainer';
 
 const useStyles = makeStyles({
   wrapper: {
@@ -19,8 +20,16 @@ const useStyles = makeStyles({
   }
 });
 
+const Header = () => (
+  <Container maxWidth="xl">
+    <h1>Cryptoinfo</h1>
+  </Container>
+);
+
 const Footer = () => (
-  <div>Footer</div>
+  <Container maxWidth="xl">
+    <div>Footer</div>
+  </Container>
 );
 
 export default function Main() {
@@ -28,19 +37,35 @@ export default function Main() {
 
   return (
     <div className={ classes.wrapper }>
+      <Header />
+
       <div className={ classes.main }>
         <Container maxWidth="xl">
-          <Grid container spacing={ 3 }>
-            <Grid item xs>
-              <Switch />
+          <Grid container alignItems="flex-start">
+
+            <Grid container item xs={ 12 } lg={ 7 }>
+
+              <Grid container alignItems="flex-end">
+                <Grid item xs>
+                  <Switch />
+                </Grid>
+
+                <Grid item xs="auto">
+                  <SelectCurrency />
+                </Grid>
+              </Grid>
+              <Grid item xs={ 12 }>
+
+                <TableContainer />
+
+              </Grid>
             </Grid>
-            <Grid item xs="auto">
-              <SelectCurrency />
+
+            <Grid container item xs={ 12 } lg={ 5 } justify="center">
+              <PieChartContainer />
             </Grid>
+
           </Grid>
-
-          <TableContainer />
-
         </Container>
       </div>
 

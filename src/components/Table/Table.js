@@ -7,18 +7,30 @@ import ListItem from '@material-ui/core/ListItem';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import TableHead from '../TableHead';
+import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
 import { groupOpenToggle } from '../../context/actions';
+import TableFooter from '../TableFooter';
+import Box from '@material-ui/core/Box';
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    width: '100%',
+  wrap: {
+    display: 'flex',
+    overflow: 'auto',
     border: '1px solid #ccc',
-    // paddingBottom: '1px'
-    // padding: theme
-    // maxWidth: 360,
+  },
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    width: '100%'
+  },
+  initRow: {
+    borderTop: '1px solid #eee',
+    padding: 0,
+    overflow: 'hidden',
+    justifyContent: 'center'
   },
   row: {
     borderTop: '1px solid #eee',
@@ -34,38 +46,47 @@ const useStyles = makeStyles(theme => ({
     padding: 0,
     transition: 'background-color 0.12s',
     '&:hover': {
-      backgroundColor: '#eee',
+      backgroundColor: '#ebebeb',
+    },
+  },
+  toggleActive: {
+    backgroundColor: '#dbdbdb',
+    '&:hover': {
+      backgroundColor: '#dbdbdb',
     },
   },
   nested: {
-    backgroundColor: '#fcfcfc',
+    backgroundColor: '#f5f5f5',
     borderTop: '1px solid #eee',
     padding: 0,
     '&:hover': {
-      backgroundColor: '#fafafa',
+      backgroundColor: '#f0f0f0',
     },
   },
-  // collapse: {
-  // borderTop: '1px solid #eee',
-  // marginTop: '-1px'
-  // }
+  collapse: {
+    width: '100%'
+    // marginTop: '-1px'
+  },
+  progress: {
+    margin: theme.spacing(2),
+    color: '#ccc'
+  },
 }));
 
 const colWidth = {
-  col1: 60,
-  col2: 140,
-  col3: 140,
-  col4: 140,
-  col5: 140,
-  col6: 140,
-  col7: 140,
-  col8: 140,
-  col9: 140
+  col1: 85,
+  col2: 145,
+  col3: 130,
+  col4: 130,
+  col5: 130,
+  col6: 100,
+  col7: 130,
+  col8: 130,
+  col9: 50
 };
 
 export default function Table() {
   const {state, dispatch} = useContext(StoreContext);
-
   const classes = useStyles();
 
   const Row = (item, hideMore) => {
@@ -73,6 +94,7 @@ export default function Table() {
       <TableRow
         data={ item }
         fiat={ state.fiat }
+        fiatSymbol={ state.fiatSymbol }
         isLoading={ state.market.isLoading }
         errorText={ state.market.error }
         colWidth={ colWidth }
@@ -80,6 +102,8 @@ export default function Table() {
       />
     );
   };
+
+  console.log('s ', state);
 
   useEffect(() => {
     if (state.groupOpenAll) {
@@ -95,51 +119,72 @@ export default function Table() {
 
   return (
     <>
-      <List component="div" className={ classes.root } disablePadding>
+      <Box className={ classes.wrap }>
+        <List component="div" className={ classes.root } disablePadding>
 
-        <TableHead colWidth={ colWidth } />
+          <TableHeader colWidth={ colWidth } />
 
-        { state.tableData.map(item => {
-          return !item.group
-                 ? <ListItem
-                   component="div"
-                   key={ item.title }
-                   className={ classes.row }
-                 >
-                   { Row(item) }
-                 </ListItem>
-                 : <React.Fragment key={ item.title }>
-                   <ListItem
-                     component="div"
-                     className={ classes.toggle }
-                     onClick={ () => dispatch(groupOpenToggle(item.title)) }
-                   >
-                     { Row(item, true) }
-                     { !!state.groupOpen.find(title => title === item.title) ? <ExpandLess /> : <ExpandMore /> }
-                   </ListItem>
+          { state.spreadsheet.isLoading
+            ? <ListItem
+              component="div"
+              key="init"
+              className={ classes.initRow }
+            >
+              <CircularProgress
+                className={ classes.progress }
+                size={ 30 }
+              />
+            </ListItem>
+            : state.spreadsheet.error
+              ? <Box m={ 1 } color="red">{ state.spreadsheet.error }</Box>
+              : state.tableData.map(item => {
+                return !item.group
+                       ? <ListItem
+                         component="div"
+                         key={ item.title }
+                         className={ classes.row }
+                       >
+                         { Row(item) }
+                       </ListItem>
+                       : <React.Fragment key={ item.title }>
+                         <ListItem
+                           component="div"
+                           className={
+                             !!state.groupOpen.find(title => title === item.title)
+                             ? `${ classes.toggle } ${ classes.toggleActive }`
+                             : classes.toggle
+                           }
+                           onClick={ () => dispatch(groupOpenToggle(item.title)) }
+                         >
+                           { Row(item, true) }
+                           { !!state.groupOpen.find(title => title === item.title) ? <ExpandLess /> : <ExpandMore /> }
+                         </ListItem>
 
-                   <Collapse
-                     in={ !!state.groupOpen.find(title => title === item.title) }
-                     timeout="auto"
-                     unmountOnExit
-                     className={ classes.collapse }
-                   >
-                     <List component="div" disablePadding>
-                       { item.group.map((i, idx) => (
-                           <ListItem
-                             component="div"
-                             className={ classes.nested }
-                             key={ `${ item.title }_${ idx }` }
-                           >
-                             { Row(i) }
-                           </ListItem>
-                         )
-                       ) }
-                     </List>
-                   </Collapse>
-                 </React.Fragment>;
-        }) }
-      </List>
+                         <Collapse
+                           in={ !!state.groupOpen.find(title => title === item.title) }
+                           timeout="auto"
+                           unmountOnExit
+                           className={ classes.collapse }
+                         >
+                           <List component="div" disablePadding>
+                             { item.group.map((i, idx) => (
+                                 <ListItem
+                                   component="div"
+                                   className={ classes.nested }
+                                   key={ `${ item.title }_${ idx }` }
+                                 >
+                                   { Row(i) }
+                                 </ListItem>
+                               )
+                             ) }
+                           </List>
+                         </Collapse>
+                       </React.Fragment>;
+              }) }
+
+        </List>
+      </Box>
+      <TableFooter tableData={ state.tableData } fiat={ state.fiat } fiatSymbol={ state.fiatSymbol } />
     </>
   );
 }
