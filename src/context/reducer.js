@@ -1,8 +1,13 @@
+import { C } from './actions';
+
 export const initialState = {
-  currency: 'usd',
+  fiat: 'btc',
+  fiatSymbol: '₿',
   sortBy: 'title',
   sortDesc: false,
   tableData: [],
+  groupOpenAll: false,
+  groupOpen: [],
   spreadsheet: {
     isLoading: false,
     error: '',
@@ -11,7 +16,9 @@ export const initialState = {
   market: {
     isLoading: false,
     error: '',
-    data: []
+    data: [],
+    priceBtc: 0,
+    priceUsdt: 0,
   }
 };
 
@@ -19,16 +26,17 @@ export const reducer = (state, action) => {
   console.log('action ', action);
 
   switch (action.type) {
-    case 'SPREADSHEET_FETCH_SUCCESS':
+    case C.SPREADSHEET_FETCH_SUCCESS:
       return {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          data: action.data
+          data: action.data,
+          error: ''
         }
       };
 
-    case 'SPREADSHEET_LOADING':
+    case C.SPREADSHEET_LOADING:
       return {
         ...state,
         spreadsheet: {
@@ -37,24 +45,29 @@ export const reducer = (state, action) => {
         }
       };
 
-    case 'SPREADSHEET_ERROR':
+    case C.SPREADSHEET_ERROR:
       return {
         ...state,
         spreadsheet: {
           ...state.spreadsheet,
-          error: action.err
+          error: action.msg
         }
       };
-    case 'MARKET_FETCH_SUCCESS':
+
+    case C.MARKET_FETCH_SUCCESS:
+      console.log('action market ', action.data);
       return {
         ...state,
         market: {
           ...state.market,
-          data: action.data
+          priceBtc: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'btc')[0].price,
+          priceUsdt: action.data.filter(item => item.label.match(/.*(?=\/)/).join().toLowerCase() === 'usdt')[0].price,
+          data: action.data,
+          error: ''
         }
       };
 
-    case 'MARKET_LOADING':
+    case C.MARKET_LOADING:
       return {
         ...state,
         market: {
@@ -63,33 +76,69 @@ export const reducer = (state, action) => {
         }
       };
 
-    case 'MARKET_ERROR':
+    case C.MARKET_ERROR:
       return {
         ...state,
         market: {
           ...state.market,
-          error: action.err
+          error: action.msg
         }
       };
 
-      case 'SET_CURRENCY':
+    case C.SET_CURRENCY:
       return {
         ...state,
-        currency: action.cur
+        fiat: action.cur,
+        fiatSymbol: (() => {
+          switch (action.cur) {
+            case 'rur':
+              return '₽';
+            case 'usdt':
+              return '$';
+            case 'eur':
+              return '€';
+            default:
+              return '₿';
+          }
+        })()
       };
 
-      case 'SET_TABLE_DATA':
+    case C.SET_TABLE_DATA:
       return {
         ...state,
         tableData: action.data
       };
 
-    case 'SORT_ITEMS':
+    case C.SORT_ITEMS:
       return {
         ...state,
         sortBy: state.sortBy === action.sortBy ? state.sortBy : action.sortBy,
         sortDesc: state.sortBy !== action.sortBy ? state.sortDesc : !state.sortDesc
       };
+
+    case C.GROUP_OPEN_TOGGLE:
+      return {
+        ...state,
+        groupOpen: state.groupOpen.find(id => id === action.id)
+                   ? state.groupOpen.filter(item => item !== action.id)
+                   : state.groupOpen.concat(action.id)
+      };
+
+    case C.GROUP_OPEN_ALL:
+      return {
+        ...state,
+        groupOpenAll: action.bool,
+        groupOpen: action.bool
+                   ? state.groupOpen
+                   : []
+      };
+
+    // case C.GROUP_CLOSE_ALL:
+    //   return {
+    //     ...state,
+    //     groupOpenAll: action.bool,
+    //     groupOpen: []
+    //   };
 
     default:
       return state;

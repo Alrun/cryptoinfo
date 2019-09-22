@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { StoreContext } from '../../context';
-import {sorting} from '../../utilites'
 
 import {
   spreadsheetFetchSuccess,
@@ -10,9 +9,9 @@ import {
   marketFetchSuccess,
   marketLoading,
   marketError,
-  setTableData,
-  setCurrency
+  setTableData
 } from '../../context/actions';
+import { sortStr } from '../../utils';
 
 import Table from '../Table';
 
@@ -38,28 +37,28 @@ export default function TableContainer() {
       try {
         const response = await axios.get(`https://spreadsheets.google.com/feeds/list/${ SPREADSHEET_ADDRESS }/od6/public/values?alt=json`);
         const spreadsheetData = schemaSpreadsheet(response.data.feed.entry);
-
         dispatch(spreadsheetFetchSuccess(spreadsheetData));
       } catch (err) {
-        spreadsheetError(err);
-        console.error(err);
+        dispatch(spreadsheetError(err.message));
+        console.error(err.message);
       }
 
       dispatch(spreadsheetLoading(false));
     })();
   }, [dispatch]);
 
-  const getMarketData = useCallback((currency = 'usd', coins = []) => {
-    const coinListWODouble = coins.reduce((acc, curr) => {
-      if (!acc.includes(curr)) {
-        acc.push(curr);
+  const getMarketData = useCallback((currency, coins = []) => {
+    const fiat = currency === 'btc' ? 'usdt' : currency;
+    const coinListWODouble = coins.reduce((acc, cur) => {
+      if (!acc.includes(cur)) {
+        acc.push(cur);
       }
       return acc;
     }, []);
 
-    const coinList = coinListWODouble.reduce((acc, curr) => {
-      if (curr.toLowerCase() !== 'btc' && curr.toLowerCase() !== 'usdt') {
-        acc += `-${ curr.toLowerCase() }btc`;
+    const coinList = coinListWODouble.reduce((acc, cur) => {
+      if (cur.toLowerCase() !== 'btc' && cur.toLowerCase() !== 'usdt') {
+        acc += `-${ cur.toLowerCase() }btc`;
       }
       return acc;
     }, 'btcbtc-usdtbtc');
@@ -75,12 +74,30 @@ export default function TableContainer() {
       dispatch(marketLoading(true));
 
       try {
-        const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ MARKET_KEY }&label=${ coinList }&fiat=${ currency }`);
-        const marketData = schemaMarket(response.data.Markets);
+        const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ MARKET_KEY }&label=${ coinList }&fiat=${ fiat }`);
+        // const marketData = schemaMarket(response.data.Markets);
 
-        dispatch(marketFetchSuccess(marketData));
+        console.log('resp ', coinList, fiat);
+
+        if (!!response.data.Markets) {
+          dispatch(marketFetchSuccess(schemaMarket(response.data.Markets)));
+        } else {
+          dispatch(marketFetchSuccess(
+            coinList.split('-').map(item => (
+              {
+                title: '',
+                label: item.replace(/(btc)$/, '/$1').toUpperCase(),
+                price: 0
+              }
+            ))
+          ));
+
+          dispatch(marketError(response.data.error));
+        }
+
+        // dispatch(marketFetchSuccess(marketData));
       } catch (err) {
-        marketError(err);
+        dispatch(marketError(err));
         console.error(err);
       }
 
@@ -92,17 +109,17 @@ export default function TableContainer() {
     getSpreadsheetData();
   }, [getSpreadsheetData]);
 
+
   useEffect(() => {
     if (!!state.spreadsheet.data.length) {
       const coinsFromSpreadsheet = state.spreadsheet.data.map(item => item.title);
-
-      getMarketData(state.currency, coinsFromSpreadsheet);
+      getMarketData(state.fiat, coinsFromSpreadsheet);
     }
   }, [
     state.spreadsheet.data.length,
     state.spreadsheet.data,
     getMarketData,
-    state.currency
+    state.fiat
   ]);
 
   const compileTableData = useCallback((spreadsheet, market) => {
@@ -111,11 +128,58 @@ export default function TableContainer() {
 
       return {
         ...item,
-        price: coinPriceData.price
+        price: coinPriceData.price,
+        label: coinPriceData.title
       };
     });
 
-    const currencyListWCount = rawData.reduce(function (acc, cur) {
+    const rawDataExtended = rawData.map(item => {
+      const calcProfit = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
+        return priceSell * quantity - priceBuy * quantity - (quantity / 100 * buyFee + quantity) / 100 * buyFee * priceBuy - quantity / 100 * sellFee * priceSell;
+      };
+
+      const calcGain = (priceSell, priceBuy, quantity) => {
+        return (priceSell * quantity - priceBuy * quantity) * 100 / (priceBuy * quantity);
+      };
+
+      return {
+        ...item,
+        buyPrice: state.fiat === 'btc'
+                  ? item.title.toLowerCase() === 'btc'
+                    ? !!state.market.priceBtc ? item.buyPrice / state.market.priceBtc : 1
+                    : item.buyPrice
+                  : item.title.toLowerCase() === 'btc'
+                    ? !!state.market.priceBtc ? item.buyPrice * state.market.priceUsdt : NaN
+                    : !!state.market.priceBtc ? item.buyPrice * state.market.priceBtc : NaN,
+        price: state.fiat === 'btc'
+               ? !!state.market.priceBtc ? item.price / state.market.priceBtc : NaN
+               : !!state.market.priceBtc ? item.price : NaN,
+        profit: state.market.priceBtc
+                ? state.fiat === 'btc'
+
+                  ? item.title.toLowerCase() === 'btc'
+                    ? calcProfit(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
+                    : calcProfit(item.price / state.market.priceBtc, item.buyPrice, item.quantity, item.buyFee, item.sellFee)
+                  : item.title.toLowerCase() === 'btc'
+                    ? calcProfit(item.price, item.buyPrice * state.market.priceUsdt, item.quantity, item.buyFee, item.sellFee)
+                    : calcProfit(item.price, item.buyPrice * state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
+                : NaN,
+        gain: state.fiat === 'btc'
+              ? item.title.toLowerCase() === 'btc'
+                ? calcGain(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity)
+                : calcGain(item.price / state.market.priceBtc, item.buyPrice, item.quantity)
+              : item.title.toLowerCase() === 'btc'
+                ? calcGain(item.price, item.buyPrice * state.market.priceUsdt, item.quantity)
+                : calcGain(item.price, item.buyPrice * state.market.priceBtc, item.quantity),
+        val: state.market.priceBtc
+             ? state.fiat === 'btc'
+               ? item.price / state.market.priceBtc * item.quantity
+               : item.price * item.quantity
+             : NaN
+      };
+    });
+
+    const currencyListWCount = rawDataExtended.reduce((acc, cur) => {
       if (!acc[cur.title]) {
         acc[cur.title] = 1;
       } else {
@@ -126,43 +190,76 @@ export default function TableContainer() {
 
     let tableArr = [];
 
+    const sortTableRows = (arr = [], sortBy, reverse) => {
+      const sortedArr = arr.sort((a, b) => {
+        if (typeof a[sortBy] === 'string' && typeof b[sortBy] === 'string') {
+          return sortStr(a[sortBy], b[sortBy]);
+        }
+        if (typeof a[sortBy] === 'number' && typeof b[sortBy] === 'number') {
+          return a[sortBy] - b[sortBy];
+        }
+        return console.error(`Not valid format data ${ a } or ${ b } for sortTableRows!`);
+      });
+      return reverse ? sortedArr.reverse() : sortedArr;
+    };
+
     for (let key in currencyListWCount) {
       if (currencyListWCount.hasOwnProperty(key)) {
         if (currencyListWCount[key] > 1) {
           let groupArr = [];
           let sum = {
+            quantity: 0,
             buyPrice: 0,
-            quantity: 0
+            val: 0,
+            profit: 0,
+            gain: 0
           };
 
-          rawData.forEach(item => {
+          rawDataExtended.forEach(item => {
             if (item.title === key) {
               groupArr.push(item);
-              sum.buyPrice += item.buyPrice;
+              sum.buyPrice += item.buyPrice * item.quantity;
               sum.quantity += item.quantity;
+              sum.profit += item.profit;
+              sum.gain += item.gain * item.quantity;
+              sum.val += item.val;
               sum.feeBuy += item.feeBuy;
               sum.feeSell += item.feeSell;
-              // console.log(dateToTimestamp(item.date));
             }
           });
 
-          const walletList = groupArr.reduce((acc, curr) => {
+          let walletList = groupArr.reduce((acc, curr) => {
             if (!acc.includes(curr.wallet)) {
               acc.push(curr.wallet);
             }
             return acc;
           }, []);
 
+          if (state.sortBy === 'wallet') {
+            walletList.sort((a, b) => {
+              return sortStr(a, b);
+            });
+
+            if (state.sortDesc) walletList.reverse();
+          }
+
           tableArr.push({
             title: key,
-            buyPrice: sum.buyPrice / currencyListWCount[key],
+            buyPrice: sum.buyPrice / sum.quantity,
             quantity: sum.quantity,
-            price: market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price,
-            wallet: walletList,
-            group: sorting(groupArr, state.sortBy, state.sortDesc)
+            val: sum.val,
+            price: !!state.market.priceBtc
+                   ? state.fiat === 'btc'
+                     ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price / state.market.priceBtc
+                     : market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price
+                   : NaN,
+            profit: sum.profit,
+            gain: sum.gain / sum.quantity,
+            wallet: walletList.join(', '),
+            group: sortTableRows(groupArr, state.sortBy, state.sortDesc)
           });
         } else {
-          rawData.forEach(item => {
+          rawDataExtended.forEach(item => {
             if (item.title === key) {
               tableArr.push(item);
             }
@@ -171,8 +268,14 @@ export default function TableContainer() {
       }
     }
 
-    dispatch(setTableData(sorting(tableArr, state.sortBy, state.sortDesc)));
-  }, [dispatch, state.sortBy, state.sortDesc]);
+    dispatch(setTableData(sortTableRows(tableArr, state.sortBy, state.sortDesc)));
+  }, [
+    dispatch,
+    state.sortBy,
+    state.sortDesc,
+    state.fiat,
+    state.market
+  ]);
 
   useEffect(() => {
     if (!!state.spreadsheet.data.length && !!state.market.data.length) {
@@ -186,26 +289,7 @@ export default function TableContainer() {
     state.market.data.length
   ]);
 
-  if (state.spreadsheet.isLoading) {
-    return (<div>Loading...</div>);
-  }
-
-  if (state.spreadsheet.error) {
-    return (<div>{ state.table.error }</div>);
-  }
-
   return (
-    <div>
-      <Table />
-
-      { <button onClick={ () => dispatch(setCurrency('rur')) }>Set Currency</button> }
-    </div>
+    <Table />
   );
 }
-
-
-// function dateToTimestamp(str) {
-//   return Date.parse(str
-//     .replace(/(\d{2}).(\d{2}).(\d{4})/, '$3-$2-$1')
-//     .replace(/\s/, 'T'));
-// }
