@@ -1,4 +1,5 @@
 export const C = {
+  SET_SPREADSHEET_LINK: 'SET_SPREADSHEET_LINK',
   SPREADSHEET_FETCH_SUCCESS: 'SPREADSHEET_FETCH_SUCCESS',
   SPREADSHEET_LOADING: 'SPREADSHEET_LOADING',
   SPREADSHEET_ERROR: 'SPREADSHEET_ERROR',
@@ -11,6 +12,11 @@ export const C = {
   GROUP_OPEN_TOGGLE: 'GROUP_OPEN_TOGGLE',
   GROUP_OPEN_ALL: 'GROUP_OPEN_ALL'
 };
+
+export const setSpreadsheetLink = link => ({
+    type: C.SET_SPREADSHEET_LINK,
+    link
+});
 
 export const spreadsheetFetchSuccess = data => ({
   type: C.SPREADSHEET_FETCH_SUCCESS,

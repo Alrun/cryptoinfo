@@ -6,9 +6,10 @@ export const initialState = {
   sortBy: 'title',
   sortDesc: false,
   tableData: [],
-  groupOpenAll: false,
+  groupOpenAll: !localStorage.groupOpenAll ? false : JSON.parse(localStorage.groupOpenAll),
   groupOpen: [],
   spreadsheet: {
+    link: '',
     isLoading: false,
     error: '',
     data: []
@@ -23,10 +24,20 @@ export const initialState = {
 };
 
 export const reducer = (state, action) => {
-  console.log('action ', action);
+  // console.log('action ', action);
 
   switch (action.type) {
-    case C.SPREADSHEET_FETCH_SUCCESS:
+
+    case C.SET_SPREADSHEET_LINK:
+      return {
+        ...state,
+        spreadsheet: {
+          ...state.spreadsheet,
+          link: action.link
+        }
+      };
+
+      case C.SPREADSHEET_FETCH_SUCCESS:
       return {
         ...state,
         spreadsheet: {
@@ -55,7 +66,6 @@ export const reducer = (state, action) => {
       };
 
     case C.MARKET_FETCH_SUCCESS:
-      console.log('action market ', action.data);
       return {
         ...state,
         market: {
@@ -132,13 +142,6 @@ export const reducer = (state, action) => {
                    ? state.groupOpen
                    : []
       };
-
-    // case C.GROUP_CLOSE_ALL:
-    //   return {
-    //     ...state,
-    //     groupOpenAll: action.bool,
-    //     groupOpen: []
-    //   };
 
     default:
       return state;

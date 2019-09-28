@@ -20,10 +20,8 @@ const head = [
 const useStyles = makeStyles(theme => ({
   root: {
     borderBottom: '1px solid #ccc',
-    // marginBottom: '-1px'
+    alignSelf: 'start',
     width: '100%',
-    // maxWidth: 360,
-    // backgroundColor: theme.palette.background.paper,
   },
   col: {
     flexShrink: 0,

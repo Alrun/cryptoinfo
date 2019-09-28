@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Box from '@material-ui/core/Box';
 import { decimalFormat, sum } from '../../utils';
+import { StoreContext } from '../../context';
 
-export default function TableFooter(props) {
+export default function TableSum() {
+  const {state/*, dispatch*/} = useContext(StoreContext);
   const [total, setTotal] = useState(0);
   const [profit, setProfit] = useState(0);
-  const {tableData, fiat, fiatSymbol} = props;
+  const {tableData, fiat, fiatSymbol} = state;
 
   useEffect(() => {
     if (tableData.length) {
@@ -15,7 +17,7 @@ export default function TableFooter(props) {
   }, [fiatSymbol, tableData]);
 
   return (
-    <Box mt={ 2 }>
+    <Box>
       <Box>{ `Total: ${ fiat === 'btc' ? total.toFixed(8) : decimalFormat(total, 2) } ${ fiatSymbol }` }</Box>
       <Box>
         Profit:

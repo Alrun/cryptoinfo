@@ -6,10 +6,12 @@ import { StoreContext } from '../../context';
 import { groupOpenAll } from '../../context/actions';
 
 export default function Switch() {
-
   const {state, dispatch} = useContext(StoreContext);
 
-  const handleChange = () => dispatch(groupOpenAll(!state.groupOpenAll));
+  const handleChange = () => {
+    dispatch(groupOpenAll(!state.groupOpenAll));
+    localStorage.groupOpenAll = !state.groupOpenAll;
+  };
 
   return (
     <FormControlLabel
@@ -20,8 +22,6 @@ export default function Switch() {
       /> }
       label="Expand all"
       labelPlacement="end"
-    >
-
-    </FormControlLabel>
+    />
   );
 }

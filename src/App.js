@@ -9,7 +9,10 @@ const theme = createMuiTheme({
   palette: {
     background: {
       default: '#fff'
-    }
+    },
+    // text: {
+    //   danger: 'red'
+    // }
   },
   overrides: {
 

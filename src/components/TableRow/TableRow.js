@@ -49,16 +49,14 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-
 export default function TableRow(props) {
   const {title, buyPrice, price, quantity, buyFee, sellFee, wallet, profit, gain, val} = props.data;
-  const {isLoading, errorText, fiat, fiatSymbol, colWidth, hideMore} = props;
+  const {isLoading, errorText, fiat, fiatSymbol, colWidth, group} = props;
   const classes = useStyles();
 
   return (
     <>
-
-      <Box className={ classes.col } style={ {width: colWidth.col1} }>
+      <Box fontWeight={group ? 'fontWeightMedium' : 'fontWeightRegular'} className={ classes.col } style={ {width: colWidth.col1} }>
         { title }
       </Box>
 
@@ -168,7 +166,7 @@ export default function TableRow(props) {
 
       </Box>
 
-      { !hideMore && <TablePopover buyFee={ buyFee } sellFee={ sellFee } /> }
+      { !group && <TablePopover buyFee={ buyFee } sellFee={ sellFee } /> }
     </>
   );
 }

@@ -12,8 +12,19 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
 import { groupOpenToggle } from '../../context/actions';
-import TableFooter from '../TableFooter';
 import Box from '@material-ui/core/Box';
+
+const colWidth = {
+  col1: 85,
+  col2: 145,
+  col3: 130,
+  col4: 130,
+  col5: 130,
+  col6: 100,
+  col7: 130,
+  col8: 130,
+  col9: 50
+};
 
 const useStyles = makeStyles(theme => ({
   wrap: {
@@ -24,7 +35,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
-    width: '100%'
+    flexGrow: 1,
+    minHeight: 59.5
   },
   initRow: {
     borderTop: '1px solid #eee',
@@ -38,7 +50,6 @@ const useStyles = makeStyles(theme => ({
     '&:hover': {
       backgroundColor: '#fafafa',
     },
-    // marginBottom: '-1px'
   },
   toggle: {
     borderTop: '1px solid #eee',
@@ -65,7 +76,6 @@ const useStyles = makeStyles(theme => ({
   },
   collapse: {
     width: '100%'
-    // marginTop: '-1px'
   },
   progress: {
     margin: theme.spacing(2),
@@ -73,23 +83,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const colWidth = {
-  col1: 85,
-  col2: 145,
-  col3: 130,
-  col4: 130,
-  col5: 130,
-  col6: 100,
-  col7: 130,
-  col8: 130,
-  col9: 50
-};
-
 export default function Table() {
   const {state, dispatch} = useContext(StoreContext);
   const classes = useStyles();
 
-  const Row = (item, hideMore) => {
+  const Row = (item, group) => {
     return (
       <TableRow
         data={ item }
@@ -98,12 +96,10 @@ export default function Table() {
         isLoading={ state.market.isLoading }
         errorText={ state.market.error }
         colWidth={ colWidth }
-        hideMore={ hideMore }
+        group={ group }
       />
     );
   };
-
-  console.log('s ', state);
 
   useEffect(() => {
     if (state.groupOpenAll) {
@@ -137,54 +133,53 @@ export default function Table() {
             </ListItem>
             : state.spreadsheet.error
               ? <Box m={ 1 } color="red">{ state.spreadsheet.error }</Box>
-              : state.tableData.map(item => {
-                return !item.group
-                       ? <ListItem
-                         component="div"
-                         key={ item.title }
-                         className={ classes.row }
-                       >
-                         { Row(item) }
-                       </ListItem>
-                       : <React.Fragment key={ item.title }>
-                         <ListItem
-                           component="div"
-                           className={
-                             !!state.groupOpen.find(title => title === item.title)
-                             ? `${ classes.toggle } ${ classes.toggleActive }`
-                             : classes.toggle
-                           }
-                           onClick={ () => dispatch(groupOpenToggle(item.title)) }
-                         >
-                           { Row(item, true) }
-                           { !!state.groupOpen.find(title => title === item.title) ? <ExpandLess /> : <ExpandMore /> }
-                         </ListItem>
+              : state.tableData.map(item => (
+                !item.group
+                ? <ListItem
+                  component="div"
+                  key={ item.title }
+                  className={ classes.row }
+                >
+                  { Row(item) }
+                </ListItem>
+                : <React.Fragment key={ item.title }>
+                  <ListItem
+                    component="div"
+                    className={
+                      !state.groupOpen.find(title => title === item.title)
+                      ? classes.toggle
+                      : `${ classes.toggle } ${ classes.toggleActive }`
+                    }
+                    onClick={ () => dispatch(groupOpenToggle(item.title)) }
+                  >
+                    { Row(item, true) }
+                    { !!state.groupOpen.find(title => title === item.title) ? <ExpandLess /> : <ExpandMore /> }
+                  </ListItem>
 
-                         <Collapse
-                           in={ !!state.groupOpen.find(title => title === item.title) }
-                           timeout="auto"
-                           unmountOnExit
-                           className={ classes.collapse }
-                         >
-                           <List component="div" disablePadding>
-                             { item.group.map((i, idx) => (
-                                 <ListItem
-                                   component="div"
-                                   className={ classes.nested }
-                                   key={ `${ item.title }_${ idx }` }
-                                 >
-                                   { Row(i) }
-                                 </ListItem>
-                               )
-                             ) }
-                           </List>
-                         </Collapse>
-                       </React.Fragment>;
-              }) }
+                  <Collapse
+                    in={ !!state.groupOpen.find(title => title === item.title) }
+                    timeout="auto"
+                    unmountOnExit
+                    className={ classes.collapse }
+                  >
+                    <List component="div" disablePadding>
+                      { item.group.map((i, idx) => (
+                          <ListItem
+                            component="div"
+                            className={ classes.nested }
+                            key={ `${ item.title }_${ idx }` }
+                          >
+                            { Row(i) }
+                          </ListItem>
+                        )
+                      ) }
+                    </List>
+                  </Collapse>
+                </React.Fragment>
+              )) }
 
         </List>
       </Box>
-      <TableFooter tableData={ state.tableData } fiat={ state.fiat } fiatSymbol={ state.fiatSymbol } />
     </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   PieChart as PC, Pie, Sector, Cell, ResponsiveContainer,
 } from 'recharts';
@@ -15,30 +15,23 @@ function lightenDarkenColor(color, percent) {
   return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (B < 255 ? B < 1 ? 0 : B : 255) * 0x100 + (G < 255 ? G < 1 ? 0 : G : 255)).toString(16).slice(1);
 }
 
-const setColors = () => {
-  const mainColor = [
-    '#f0f0f0'
+const setColors = (count) => {
+  const mainColors = [
+    '#dddddd'
   ];
-  const grade = 6;
-
+  const grade = count;
   let colors = [];
 
-  for (let i = 0; i < mainColor.length; i++) {
+  for (let i = 0; i < mainColors.length; i++) {
     let num = 0;
     for (let j = 0; j < grade; j++) {
-      colors.push(lightenDarkenColor(mainColor[i], num));
-      num -= 11;
+      colors.push(lightenDarkenColor(mainColors[i], num));
+      num -= 50 / count;
     }
   }
 
-  // console.log(colors);
-
   return colors;
 };
-
-// setColors(colors, 3);
-
-// console.log(COLORS);
 
 // const RADIAN = Math.PI / 180;
 // const renderCustomizedLabel = ({cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
@@ -63,7 +56,7 @@ const setColors = () => {
 
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
-  const {cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, name, value} = props;
+  const {cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, name} = props;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
   const sx = cx + (outerRadius + 10) * cos;
@@ -76,7 +69,8 @@ const renderActiveShape = (props) => {
 
   return (
     <g>
-      {/*<text x={ cx } y={ cy } dy={ 8 } textAnchor="middle" fill="#000">{ payload.name }</text>*/}
+      <text x={ cx } y={ cy + 20 } dy={ 8 } textAnchor="middle"
+            fill="#000">{ `${ payload.fiat === 'btc' ? payload.value.toFixed(8) : decimalFormat(payload.value, 2) } ${ payload.fiatSymbol }` }</text>
       <Sector
         cx={ cx }
         cy={ cy }
@@ -105,51 +99,56 @@ const renderActiveShape = (props) => {
   );
 };
 
-export default function PieChart(props) {
+let data = [];
+let colors = [];
+
+const ActiveShapePieChart = memo(props => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const {data, fiat, fiatSymbol} = props;
 
-  const handlePieEnter = (data, index) => {
+  const onMouseEnter = useCallback((data, index) => {
     setActiveIndex(index);
-  };
+  }, []);
 
-
-
-  // console.log(fiat, fiatSymbol);
+  console.log(props);
 
   return (
-    <Box>
-      <Box>
-      { `${ fiat === 'btc' ? sum(data, 'value').toFixed(8) : decimalFormat(sum(data, 'value'), 2) } ${ fiatSymbol }` }
-      </Box>
-      <ResponsiveContainer width={ 400 } height={ 400 }>
+    <PC width={ 600 } height={ 450 } style={ {margin: 'auto'} }>
+      <Pie
+        data={ data }
+        innerRadius={ 135 }
+        outerRadius={ 160 }
+        fill="#8884d8"
+        dataKey="value"
+        paddingAngle={ 1 }
+        activeIndex={ activeIndex }
+        activeShape={ renderActiveShape }
+        onMouseEnter={ onMouseEnter }
+        isAnimationActive={ true }
+      >
+        {
+          data.map((entry, index) => (
+            <Cell
+              key={ `cell-${ index }` }
+              fill={ colors[index % colors.length] }
+            />
+          ))
+        }
+      </Pie>
+    </PC>
+  );
+});
 
-        <PC
-          // width="100%" height="100%"
-        >
-          <Pie
-            data={ data }
-            // cx={ 200 }
-            // cy={ 200 }
-            innerRadius={ 70 }
-            outerRadius={ 90 }
-            fill="#8884d8"
-            dataKey="value"
-            paddingAngle={ 1 }
-            activeIndex={ activeIndex }
-            activeShape={ renderActiveShape }
-            onMouseEnter={ handlePieEnter }
-            // labelLine={ false }
-            // label={ renderCustomizedLabel }
-          >
-            {
-              data.map((entry, index) => <Cell key={ `cell-${ index }` }
-                                               fill={ setColors()[index % setColors().length] } />)
-            }
-          </Pie>
-        </PC>
-      </ResponsiveContainer>
-    </Box>
+export default function PieChart(props) {
 
+  useEffect(() => {
+    data = props.data;
+    colors = setColors(props.data.length);
+  }, [props.data]);
+
+  return (
+    <>
+      { !!props.data.length &&
+      <ActiveShapePieChart data={ props.data } fiatSymbol={ props.fiatSymbol } /> }
+    </>
   );
 }

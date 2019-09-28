@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { StoreContext } from '../../context';
-
+import { sortStr } from '../../utils';
+import Table from '../Table';
 import {
   spreadsheetFetchSuccess,
   spreadsheetLoading,
@@ -11,17 +12,14 @@ import {
   marketError,
   setTableData
 } from '../../context/actions';
-import { sortStr } from '../../utils';
 
-import Table from '../Table';
-
-const SPREADSHEET_ADDRESS = '1paG7wL-ZRiAHvU6QcvtISVX2ROP8NTcvslQETh8ZdRQ';
-const MARKET_KEY = 'DX8Js7mGTjkscOevUm0IpubG0nMWuO';
+export const DEMO_SPREADSHEET = '1paG7wL-ZRiAHvU6QcvtISVX2ROP8NTcvslQETh8ZdRQ';
+const DEMO_KEY = 'DX8Js7mGTjkscOevUm0IpubG0nMWuO';
 
 export default function TableContainer() {
   const {state, dispatch} = useContext(StoreContext);
 
-  const getSpreadsheetData = useCallback(() => {
+  const getSpreadsheetData = useCallback((link) => {
     const schemaSpreadsheet = data => data.map(item => ({
       title: item.gsx$title.$t.toUpperCase(),
       buyPrice: parseFloat(item.gsx$price.$t.replace(',', '.')),
@@ -35,9 +33,10 @@ export default function TableContainer() {
       dispatch(spreadsheetLoading(true));
 
       try {
-        const response = await axios.get(`https://spreadsheets.google.com/feeds/list/${ SPREADSHEET_ADDRESS }/od6/public/values?alt=json`);
+        const response = await axios.get(`https://spreadsheets.google.com/feeds/list/${ link }/od6/public/values?alt=json`);
         const spreadsheetData = schemaSpreadsheet(response.data.feed.entry);
         dispatch(spreadsheetFetchSuccess(spreadsheetData));
+        if (link !== DEMO_SPREADSHEET) localStorage.spreadSheetLink = link;
       } catch (err) {
         dispatch(spreadsheetError(err.message));
         console.error(err.message);
@@ -74,10 +73,7 @@ export default function TableContainer() {
       dispatch(marketLoading(true));
 
       try {
-        const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ MARKET_KEY }&label=${ coinList }&fiat=${ fiat }`);
-        // const marketData = schemaMarket(response.data.Markets);
-
-        console.log('resp ', coinList, fiat);
+        const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ DEMO_KEY }&label=${ coinList }&fiat=${ fiat }`);
 
         if (!!response.data.Markets) {
           dispatch(marketFetchSuccess(schemaMarket(response.data.Markets)));
@@ -94,8 +90,6 @@ export default function TableContainer() {
 
           dispatch(marketError(response.data.error));
         }
-
-        // dispatch(marketFetchSuccess(marketData));
       } catch (err) {
         dispatch(marketError(err));
         console.error(err);
@@ -105,26 +99,11 @@ export default function TableContainer() {
     })();
   }, [dispatch]);
 
-  useEffect(() => {
-    getSpreadsheetData();
-  }, [getSpreadsheetData]);
-
-
-  useEffect(() => {
-    if (!!state.spreadsheet.data.length) {
-      const coinsFromSpreadsheet = state.spreadsheet.data.map(item => item.title);
-      getMarketData(state.fiat, coinsFromSpreadsheet);
-    }
-  }, [
-    state.spreadsheet.data.length,
-    state.spreadsheet.data,
-    getMarketData,
-    state.fiat
-  ]);
-
   const compileTableData = useCallback((spreadsheet, market) => {
     const rawData = spreadsheet.map(item => {
-      const coinPriceData = market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase())[0];
+      const coinPriceData = market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase()).length
+        ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase())[0]
+        : 0;
 
       return {
         ...item,
@@ -278,8 +257,47 @@ export default function TableContainer() {
   ]);
 
   useEffect(() => {
-    if (!!state.spreadsheet.data.length && !!state.market.data.length) {
-      compileTableData(state.spreadsheet.data, state.market.data);
+    if (!state.spreadsheet.link) {
+      if (!localStorage.spreadSheetLink) {
+        getSpreadsheetData(DEMO_SPREADSHEET);
+      } else {
+        getSpreadsheetData(localStorage.spreadSheetLink);
+      }
+    } else {
+      getSpreadsheetData(state.spreadsheet.link);
+    }
+  }, [state.spreadsheet.link, getSpreadsheetData]);
+
+  useEffect(() => {
+    if (state.spreadsheet.data.length) {
+      const coinsFromSpreadsheet = state.spreadsheet.data.map(item => item.title);
+      getMarketData(state.fiat, coinsFromSpreadsheet);
+    }
+  }, [
+    state.spreadsheet.data.length,
+    state.spreadsheet.data,
+    getMarketData,
+    state.fiat
+  ]);
+
+  useEffect(() => {
+    if (state.spreadsheet.data.length && state.market.data.length) {
+      const ssList = state.spreadsheet.data.reduce((acc, cur) => {
+        if (!acc.includes(cur.title)) {
+          acc.push(cur.title);
+        }
+        return acc;
+      }, ['USDT', 'BTC']);
+      const mList = state.market.data.reduce((acc, cur) => {
+        if (!acc.includes(cur.label.match(/.*(?=\/)/).join())) {
+          acc.push(cur.label.match(/.*(?=\/)/).join());
+        }
+        return acc;
+      }, ['USDT', 'BTC']);
+
+      if (mList.length === ssList.length) {
+        compileTableData(state.spreadsheet.data, state.market.data);
+      }
     }
   }, [
     state.spreadsheet.data,
