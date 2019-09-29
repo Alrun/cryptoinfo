@@ -17,14 +17,8 @@ const useStyles = makeStyles(theme => ({
   },
   logo: {
     ...theme.typography.h4,
-    margin: 0,//theme.spacing(1, 0),
+    margin: 0,
     letterSpacing: 3,
-  },
-  // hide: {
-  //   display: 'none',
-  // },
-  menuButton: {
-    // margin: theme.spacing(1, 0),
   },
   row: {
     marginTop: 5,
@@ -53,16 +47,12 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-
 export default function Header() {
   const classes = useStyles();
   const [sidebar, setSidebar] = useState(false);
 
   const toggleDrawer = open => event => {
-    if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-
+    if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) return;
     setSidebar(open);
   };
 

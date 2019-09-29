@@ -2,7 +2,6 @@ import React from 'react';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-
 import Switch from '../Switch';
 import TableContainer from '../TableContainer';
 import PieChartContainer from '../PieChartContainer';
@@ -23,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   },
   price: {
     display: 'none',
-    [theme.breakpoints.up('xl')]: {
+    [theme.breakpoints.up('sm')]: {
       display: 'block',
       position: 'absolute',
       top: 0,
@@ -33,12 +32,13 @@ const useStyles = makeStyles(theme => ({
       margin: 'auto',
       height: '1.8rem',
       textAlign: 'center'
-    },
+    }
   },
   col1: {
+    marginRight: 'auto',
+    textAlign: 'right',
     [theme.breakpoints.up('lg')]: {
       order: 2,
-      textAlign: 'right'
     },
     [theme.breakpoints.up('xl')]: {
       display: 'none'
@@ -50,11 +50,9 @@ const useStyles = makeStyles(theme => ({
     },
   },
   col3: {
+    position: 'relative',
     [theme.breakpoints.up('lg')]: {
       order: 3,
-    },
-    [theme.breakpoints.up('xl')]: {
-      position: 'relative'
     },
   },
 }));
@@ -70,11 +68,11 @@ export default function Main() {
         <Container fixed maxWidth="xl">
           <Grid container spacing={ 3 } alignItems="flex-start">
 
-            <Grid item sm="auto" lg={2} className={classes.col1} >
-              <Price/>
+            <Grid item sm="auto" lg={ 2 } className={ classes.col1 }>
+              <Price />
             </Grid>
 
-            <Grid container item xs={ 12 } lg={10} xl={7} className={classes.col2}>
+            <Grid container item xs={ 12 } lg={ 10 } xl={ 7 } className={ classes.col2 }>
               <Grid container alignItems="flex-end">
                 <Grid item xs>
                   <Switch />
@@ -85,10 +83,9 @@ export default function Main() {
               </Grid>
             </Grid>
 
-
-            <Grid item xs={ 12 } sm xl={5} className={classes.col3}>
-              <div className={classes.price}>
-                <Price/>
+            <Grid item xs={ 12 } sm xl={ 5 } className={ classes.col3 }>
+              <div className={ classes.price }>
+                <Price />
               </div>
               <PieChartContainer />
             </Grid>

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -6,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import NoteAddOutlinedIcon from '@material-ui/icons/NoteAddOutlined';
-import VpnKeyOutlinedIcon from '@material-ui/icons/VpnKeyOutlined';
+// import VpnKeyOutlinedIcon from '@material-ui/icons/VpnKeyOutlined';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import { makeStyles } from '@material-ui/core/styles';
 import SSModal from '../SSModal';
@@ -54,12 +55,12 @@ export default function Sidebar(props) {
           </ListItemIcon>
           <ListItemText primary="Add Spreadsheet" />
         </ListItem>
-        <ListItem button>
-          <ListItemIcon className={classes.icon}>
-            <VpnKeyOutlinedIcon />
-          </ListItemIcon>
-          <ListItemText primary="Add Key" />
-        </ListItem>
+        {/*<ListItem button>*/}
+        {/*  <ListItemIcon className={classes.icon}>*/}
+        {/*    <VpnKeyOutlinedIcon />*/}
+        {/*  </ListItemIcon>*/}
+        {/*  <ListItemText primary="Add Key" />*/}
+        {/*</ListItem>*/}
       </List>
       <Divider />
 
@@ -68,3 +69,7 @@ export default function Sidebar(props) {
     </div>
   );
 }
+
+Sidebar.propTypes = {
+  toggleDrawer: PropTypes.func
+};

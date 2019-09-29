@@ -1,5 +1,5 @@
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import TablePopover from '../TablePopover/TablePopover';
@@ -8,7 +8,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { decimalFormat } from '../../utils';
-
 
 const useStyles = makeStyles(theme => ({
   col: {
@@ -170,3 +169,12 @@ export default function TableRow(props) {
     </>
   );
 }
+
+TableRow.propTypes = {
+  isLoading: PropTypes.bool,
+  errorText: PropTypes.string,
+  fiat: PropTypes.string.isRequired,
+  fiatSymbol: PropTypes.string.isRequired,
+  colWidth: PropTypes.object,
+  group: PropTypes.bool
+};

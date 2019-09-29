@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import PropTypes from 'prop-types';
 import { StoreContext } from '../../context';
 import { sortItems } from '../../context/actions';
 import Box from '@material-ui/core/Box';
@@ -17,7 +18,7 @@ const head = [
   {id: 'wallet', title: 'Wallet'},
 ];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles({
   root: {
     borderBottom: '1px solid #ccc',
     alignSelf: 'start',
@@ -53,15 +54,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'flex-start',
     flexGrow: 1
   },
-
-  // toggle: {
-  //   // border: '1px solid #999',
-  // },
-  // nested: {
-  //   backgroundColor: '#f9f9f9'
-  //   // paddingLeft: theme.spacing(4),
-  // }
-}));
+});
 
 export default function TableHeader(props) {
   const {state, dispatch} = useContext(StoreContext);
@@ -103,3 +96,7 @@ export default function TableHeader(props) {
     </Box>
   );
 }
+
+TableHeader.propTypes = {
+  colWidth: PropTypes.object
+};

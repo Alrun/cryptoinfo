@@ -1,10 +1,6 @@
 import React, { useContext } from 'react';
 import { StoreContext } from '../../context';
-
-import { setCurrency } from '../../context/actions';
-
 import { makeStyles } from '@material-ui/core/styles';
-
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Popper from '@material-ui/core/Popper';
 import Button from '@material-ui/core/Button';
@@ -12,30 +8,7 @@ import Fade from '@material-ui/core/Fade';
 import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-
-// const CustomInput = withStyles(theme => ({
-//   root: {
-//     //   'label + &': {
-//     //     marginTop: theme.spacing(5),
-//     //   },
-//   },
-//   input: {
-//     borderRadius: 5,
-//     position: 'relative',
-//     backgroundColor: theme.palette.background.paper,
-//     border: '1px solid #ced4da',
-//     fontSize: 14,
-//     padding: '8px 24px 8px 8px',
-//     transition: theme.transitions.create(['border-color', 'box-shadow']),
-//     // Use the system font instead of the default Roboto font.
-//     '&:focus': {
-//       background: theme.palette.background.paper,
-//       borderRadius: 5,
-//       // borderColor: '#80bdff',
-//       // boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-//     },
-//   },
-// }))(InputBase);
+import { setCurrency } from '../../context/actions';
 
 const currencyList = [
   {id: 'btc', title: 'BTC', symbol: '₿'},
@@ -62,20 +35,6 @@ const useStyles = makeStyles(theme => ({
     lineHeight: '1.3em',
     textAlign: 'center',
     marginRight: 8,
-  },
-  menu: {
-    // border: '1px solid red',
-    // minWidth: 90
-  },
-  menuList: {
-    // border: '1px solid green',
-    // padding: 0,
-  },
-  menuItem: {
-    // minWidth: 90,
-    // fontSize: '1rem',
-    // minHeight: 40,
-    // paddingLeft: 10
   }
 }));
 
@@ -126,7 +85,7 @@ export default function SelectCurrency() {
           >
             { ({TransitionProps}) => (
               <Fade { ...TransitionProps } timeout={ 150 }>
-                <Paper>
+                <Paper elevation={8}>
                   <List component="div">
                     { currencyList.map(item => (
                       <ListItem
@@ -148,6 +107,5 @@ export default function SelectCurrency() {
           </Popper>
         </div>
       </ClickAwayListener>
-
   );
 }

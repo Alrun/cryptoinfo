@@ -1,23 +1,13 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
-  PieChart as PC, Pie, Sector, Cell, ResponsiveContainer,
+  PieChart as PC, Pie, Sector, Cell,
 } from 'recharts';
-import { decimalFormat, sum } from '../../utils';
-import Box from '@material-ui/core/Box';
-
-function lightenDarkenColor(color, percent) {
-  let num = parseInt(color.replace('#', ''), 16),
-    amt = Math.round(2.55 * percent),
-    R = (num >> 16) + amt,
-    B = ((num >> 8) & 0x00FF) + amt,
-    G = (num & 0x0000FF) + amt;
-
-  return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + (B < 255 ? B < 1 ? 0 : B : 255) * 0x100 + (G < 255 ? G < 1 ? 0 : G : 255)).toString(16).slice(1);
-}
+import { decimalFormat, lightenDarkenColor } from '../../utils';
 
 const setColors = (count) => {
   const mainColors = [
-    '#dddddd'
+    '#eeeeee'
   ];
   const grade = count;
   let colors = [];
@@ -26,33 +16,12 @@ const setColors = (count) => {
     let num = 0;
     for (let j = 0; j < grade; j++) {
       colors.push(lightenDarkenColor(mainColors[i], num));
-      num -= 50 / count;
+      num -= 30 / count;
     }
   }
 
-  return colors;
+  return colors.reverse();
 };
-
-// const RADIAN = Math.PI / 180;
-// const renderCustomizedLabel = ({cx, cy, midAngle, innerRadius, outerRadius, percent, index}) => {
-//   const radius = innerRadius + (outerRadius - innerRadius) * 0.3;
-//   const x = cx + radius * Math.cos(-midAngle * RADIAN);
-//   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-//
-//   if ((percent * 100).toFixed(0) > 5) {
-//     return (
-//       <text
-//         x={ x } y={ y }
-//         fill="white"
-//         textAnchor={ x > cx ? 'start' : 'end' }
-//         dominantBaseline="baseline"
-//       >
-//         {/*{ `${ (percent * 100).toFixed(0) }%` }*/ }
-//         { data[index].name }
-//       </text>
-//     );
-//   }
-// };
 
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
@@ -69,8 +38,17 @@ const renderActiveShape = (props) => {
 
   return (
     <g>
-      <text x={ cx } y={ cy + 20 } dy={ 8 } textAnchor="middle"
-            fill="#000">{ `${ payload.fiat === 'btc' ? payload.value.toFixed(8) : decimalFormat(payload.value, 2) } ${ payload.fiatSymbol }` }</text>
+      <text
+        x={ cx }
+        y={ cy + 20 }
+        dy={ 8 }
+        textAnchor="middle"
+        fill="#999"
+      >
+        { `${ payload.fiat === 'btc'
+              ? payload.value.toFixed(8)
+              : decimalFormat(payload.value, 2) } ${ payload.fiatSymbol }` }
+      </text>
       <Sector
         cx={ cx }
         cy={ cy }
@@ -99,29 +77,77 @@ const renderActiveShape = (props) => {
   );
 };
 
+const renderActiveShapeCompact = (props) => {
+  const {cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, name} = props;
+
+  return (
+    <g>
+      <text
+        x={ cx }
+        y={ cy }
+        dy={ 8 }
+        textAnchor="middle"
+        fill="#777"
+        fontSize="1.25rem"
+        fontWeight="500"
+      >
+        { `${ name } (${ (percent * 100).toFixed(2) }%)` }
+      </text>
+      <text
+        x={ cx }
+        y={ cy + 20 }
+        dy={ 8 }
+        textAnchor="middle"
+        fill="#999"
+      >
+        { `${ payload.fiat === 'btc'
+              ? payload.value.toFixed(8)
+              : decimalFormat(payload.value, 2) } ${ payload.fiatSymbol }` }
+      </text>
+      <Sector
+        cx={ cx }
+        cy={ cy }
+        innerRadius={ innerRadius }
+        outerRadius={ outerRadius }
+        startAngle={ startAngle }
+        endAngle={ endAngle }
+        fill={ fill }
+      />
+      <Sector
+        cx={ cx }
+        cy={ cy }
+        startAngle={ startAngle }
+        endAngle={ endAngle }
+        innerRadius={ outerRadius + 4 }
+        outerRadius={ outerRadius + 6 }
+        fill={ fill }
+      />
+    </g>
+  );
+};
+
 let data = [];
 let colors = [];
 
 const ActiveShapePieChart = memo(props => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const {width, height, outer, compact} = props;
 
   const onMouseEnter = useCallback((data, index) => {
     setActiveIndex(index);
   }, []);
 
-  console.log(props);
-
   return (
-    <PC width={ 600 } height={ 450 } style={ {margin: 'auto'} }>
+    <PC width={ width } height={ height } style={ {margin: 'auto'} }>
       <Pie
         data={ data }
-        innerRadius={ 135 }
-        outerRadius={ 160 }
+        outerRadius={ outer / 2 }
+        innerRadius={ outer * 0.865 / 2 }
         fill="#8884d8"
         dataKey="value"
         paddingAngle={ 1 }
         activeIndex={ activeIndex }
-        activeShape={ renderActiveShape }
+        activeShape={ compact ? renderActiveShapeCompact : renderActiveShape }
         onMouseEnter={ onMouseEnter }
         isAnimationActive={ true }
       >
@@ -139,16 +165,33 @@ const ActiveShapePieChart = memo(props => {
 });
 
 export default function PieChart(props) {
+  const {pieData, fiatSymbol, width, height, outer, compact} = props;
 
   useEffect(() => {
-    data = props.data;
-    colors = setColors(props.data.length);
-  }, [props.data]);
+    data = pieData;
+    colors = setColors(pieData.length);
+  }, [pieData]);
 
   return (
     <>
-      { !!props.data.length &&
-      <ActiveShapePieChart data={ props.data } fiatSymbol={ props.fiatSymbol } /> }
+      { !!props.pieData.length &&
+      <ActiveShapePieChart
+        pieData={ pieData }
+        fiatSymbol={ fiatSymbol }
+        width={ width }
+        height={ height }
+        outer={ outer }
+        compact={ compact }
+      /> }
     </>
   );
 }
+
+PieChart.propTypes = {
+  pieData: PropTypes.array.isRequired,
+  fiatSymbol: PropTypes.string.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  outer: PropTypes.number.isRequired,
+  compact: PropTypes.bool
+};

@@ -1,6 +1,5 @@
 import React, { useContext, useEffect } from 'react';
 import { StoreContext } from '../../context';
-
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -8,7 +7,6 @@ import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 import TableHeader from '../TableHeader';
 import TableRow from '../TableRow';
 import { groupOpenToggle } from '../../context/actions';

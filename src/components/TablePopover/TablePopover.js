@@ -1,8 +1,11 @@
 import React from 'react';
-import Popover from '@material-ui/core/Popover';
+import PropTypes from 'prop-types';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
+import Popper from '@material-ui/core/Popper';
+import Fade from '@material-ui/core/Fade';
+import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -25,57 +28,55 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function MouseOverPopover(props) {
+export default function TablePopover(props) {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
   const {buyFee, sellFee} = props;
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
-  function handlePopoverOpen(event) {
-    setAnchorEl(event.currentTarget);
-  }
+  const handleOpen = e => {
+    setAnchorEl(anchorEl ? null : e.currentTarget);
+  };
 
-  function handlePopoverClose() {
+  const handleClickAway = () => {
     setAnchorEl(null);
-  }
-
-  const open = Boolean(anchorEl);
+  };
 
   return (
     <>
-      <Box
-        className={classes.root}
-        aria-owns={open ? 'mouse-over-popover' : undefined}
-        aria-haspopup="true"
-        onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}
-      >
-        <MoreVertIcon className={classes.icon} />
-      </Box>
-      <Popover
-        id="mouse-over-popover"
-        className={classes.popover}
-        classes={{
-          paper: classes.paper,
-        }}
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        onClose={handlePopoverClose}
-        disableRestoreFocus
-        children={
-          <Box>
-            <Box>{`Buy fee: ${buyFee}%`}</Box>
-            <Box>{`Sell fee: ${sellFee}%`}</Box>
-          </Box>
-        }
-      />
+        <Box
+          className={classes.root}
+          aria-owns={!!anchorEl ? 'mouse-over-popper' : undefined}
+          aria-haspopup="true"
+          onMouseEnter={handleOpen}
+          onMouseLeave={handleClickAway}
+        >
+          <MoreVertIcon className={classes.icon} />
+        </Box>
+      <div>
+        <Popper
+          open={ !!anchorEl }
+          anchorEl={ anchorEl }
+          transition
+          placement="right-end"
+        >
+          { ({TransitionProps}) => (
+            <Fade { ...TransitionProps } timeout={ 150 }>
+              <Paper elevation={8}>
+                <Box p={1}>
+                  <div>{`Buy fee: ${buyFee}%`}</div>
+                 <div>{`Sell fee: ${sellFee}%`}</div>
+                 </Box>
+              </Paper>
+
+            </Fade>
+          ) }
+        </Popper>
+      </div>
     </>
-  );
+  )
 }
+
+TablePopover.propTypes = {
+  buyFee: PropTypes.number,
+  sellFee: PropTypes.number
+};

@@ -10,9 +10,6 @@ const theme = createMuiTheme({
     background: {
       default: '#fff'
     },
-    // text: {
-    //   danger: 'red'
-    // }
   },
   overrides: {
 

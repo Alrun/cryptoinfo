@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { default as SwitchUI } from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-
 import { StoreContext } from '../../context';
 import { groupOpenAll } from '../../context/actions';
 
@@ -16,6 +15,7 @@ export default function Switch() {
   return (
     <FormControlLabel
       control={ <SwitchUI
+        color="default"
         checked={ state.groupOpenAll }
         onChange={ handleChange }
         inputProps={ {'aria-label': 'secondary checkbox'} }
