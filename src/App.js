@@ -1,31 +1,25 @@
-import React, { useReducer } from 'react';
-import { reducer, initialState } from './context/reducer';
-import { StoreContext } from './context';
-import Main from './components/Main';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-
-const theme = createMuiTheme({
-  palette: {
-    background: {
-      default: '#fff'
-    },
-  },
-  overrides: {
-
-  }
-});
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
   return (
-    <StoreContext.Provider value={ {dispatch, state} }>
-      <MuiThemeProvider theme={ theme }>
-        <CssBaseline />
-        <Main />
-      </MuiThemeProvider>
-    </StoreContext.Provider>
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+    </div>
   );
 }
 
