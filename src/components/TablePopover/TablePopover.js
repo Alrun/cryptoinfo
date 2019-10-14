@@ -61,8 +61,8 @@ export default function TablePopover(props) {
             <Fade { ...TransitionProps } timeout={ 150 }>
               <Paper elevation={8}>
                 <Box p={1}>
-                  <div>{`Buy fee: ${buyFee}%`}</div>
-                 <div>{`Sell fee: ${sellFee}%`}</div>
+                  <div>{`Buy fee: ${!buyFee ? 'N/A' : `${buyFee}%`}`}</div>
+                 <div>{`Sell fee: ${!sellFee ? 'N/A' : `${sellFee}%`}`}</div>
                  </Box>
               </Paper>
             </Fade>

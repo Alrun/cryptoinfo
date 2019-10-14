@@ -1,15 +1,32 @@
 /**
  * Compares strings to sort
  *
- * @param {String} a
- * @param {String} b
- * @returns {Number}
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
  */
 export function sortStr(a, b) {
   if (a.toLowerCase() > b.toLowerCase()) {
     return 1;
   }
   if (a.toLowerCase() < b.toLowerCase()) {
+    return -1;
+  }
+  return 0;
+}
+
+/**
+ * Compares numbers to sort
+ *
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
+ */
+export function sortNum(a, b) {
+  if (a > b) {
+    return 1;
+  }
+  if (a < b) {
     return -1;
   }
   return 0;
@@ -38,13 +55,15 @@ export function decimalFormat(number, decimals = 0, decPoint = ',', thousandsSep
 /**
  * The sum of the numbers
  *
- * @param {Array.<{Object}>} arr
- * @param {String} key - key with number
- * @returns {Number}
+ * @param {array.<{object}>} arr
+ * @param {string} key - key with number
+ * @returns {number}
  */
 export function sum(arr, key) {
   return arr.reduce((acc, cur) => {
-    acc += cur[key];
+    if (!isNaN(cur[key])) {
+      acc += cur[key];
+    }
     return acc;
   }, 0);
 }

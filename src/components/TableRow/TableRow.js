@@ -62,7 +62,7 @@ export default function TableRow(props) {
       <Box
         className={ classes.col }
         style={ {width: colWidth.col2, textAlign: 'right'} }>
-        { quantity.toFixed(8) }
+        { quantity === 0 ? 0 : quantity.toFixed(8) }
       </Box>
 
       <Box

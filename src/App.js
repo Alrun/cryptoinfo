@@ -15,7 +15,7 @@ const theme = createMuiTheme({
   }
 });
 
-function App() {
+export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   return (
@@ -27,5 +27,3 @@ function App() {
     </StoreContext.Provider>
   );
 }
-
-export default App;

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { StoreContext } from '../../context';
 import PieChart from '../PieChart';
-import { sortStr } from '../../utils';
+import { sortNum } from '../../utils';
 import { makeStyles } from '@material-ui/core';
 import Fade from '@material-ui/core/Fade';
 import { useTheme } from '@material-ui/core/styles';
@@ -42,13 +42,16 @@ export default function PieChartContainer() {
   useEffect(() => {
     if (!!tableData.length) {
       setPieData(tableData.map(item => {
-        return {
-          name: item.title,
-          value: item.val,
-          fiat: fiat,
-          fiatSymbol: fiatSymbol
-        };
-      }).sort((a, b) => sortStr(a.name, b.name)));
+        if (!isNaN(item.val)) {
+          return {
+            name: item.title,
+            value: item.val,
+            fiat: fiat,
+            fiatSymbol: fiatSymbol
+          };
+        }
+        return null;
+      }).filter(item => !!item).sort((a, b) => sortNum(b.value, a.value)));
     }
   }, [tableData.length, tableData, fiatSymbol, fiat]);
 

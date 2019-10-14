@@ -102,8 +102,8 @@ export default function TableContainer() {
   const compileTableData = useCallback((spreadsheet, market) => {
     const rawData = spreadsheet.map(item => {
       const coinPriceData = market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase()).length
-        ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase())[0]
-        : 0;
+                            ? market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === item.title.toLowerCase())[0]
+                            : 0;
 
       return {
         ...item,
@@ -123,6 +123,7 @@ export default function TableContainer() {
 
       return {
         ...item,
+        quantity: item.quantity || 0,
         buyPrice: state.fiat === 'btc'
                   ? item.title.toLowerCase() === 'btc'
                     ? !!state.market.priceBtc ? item.buyPrice / state.market.priceBtc : 1
@@ -135,7 +136,6 @@ export default function TableContainer() {
                : !!state.market.priceBtc ? item.price : NaN,
         profit: state.market.priceBtc
                 ? state.fiat === 'btc'
-
                   ? item.title.toLowerCase() === 'btc'
                     ? calcProfit(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
                     : calcProfit(item.price / state.market.priceBtc, item.buyPrice, item.quantity, item.buyFee, item.sellFee)
@@ -197,18 +197,18 @@ export default function TableContainer() {
           rawDataExtended.forEach(item => {
             if (item.title === key) {
               groupArr.push(item);
-              sum.buyPrice += item.buyPrice * item.quantity;
+              sum.buyPrice += (item.buyPrice || 0) * item.quantity;
               sum.quantity += item.quantity;
-              sum.profit += item.profit;
-              sum.gain += item.gain * item.quantity;
-              sum.val += item.val;
-              sum.feeBuy += item.feeBuy;
-              sum.feeSell += item.feeSell;
+              sum.profit += item.profit || 0;
+              sum.gain += item.gain * item.quantity || 0;
+              sum.val += item.val || 0;
+              sum.feeBuy += item.feeBuy || 0;
+              sum.feeSell += item.feeSell || 0;
             }
           });
 
           let walletList = groupArr.reduce((acc, curr) => {
-            if (!acc.includes(curr.wallet)) {
+            if (!acc.includes(curr.wallet) && curr.wallet) {
               acc.push(curr.wallet);
             }
             return acc;
@@ -282,6 +282,10 @@ export default function TableContainer() {
 
   useEffect(() => {
     if (state.spreadsheet.data.length && state.market.data.length) {
+
+      /**
+       * Todo [...new Set(array)] - only uniq values
+       */
       const ssList = state.spreadsheet.data.reduce((acc, cur) => {
         if (!acc.includes(cur.title)) {
           acc.push(cur.title);
