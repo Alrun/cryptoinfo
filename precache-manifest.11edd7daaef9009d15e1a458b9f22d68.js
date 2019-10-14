@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "b9536d548eda779a74df1ebadd692d5a",
+    "revision": "ab246b863147c8bf0442b5f2b4f68059",
     "url": "/cryptoinfo/index.html"
   },
   {
@@ -8,8 +8,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/cryptoinfo/static/js/2.4cbd10f7.chunk.js"
   },
   {
-    "revision": "cd62ccad4588d51822f5",
-    "url": "/cryptoinfo/static/js/main.59265075.chunk.js"
+    "revision": "293cbbf358bba5f5e76a",
+    "url": "/cryptoinfo/static/js/main.c8fc6bf4.chunk.js"
   },
   {
     "revision": "8de2cd40047194b980cc",
