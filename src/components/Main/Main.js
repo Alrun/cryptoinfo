@@ -2,7 +2,6 @@ import React from 'react';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import Switch from '../Switch';
 import TableContainer from '../TableContainer';
 import PieChartContainer from '../PieChartContainer';
 import Header from '../Header';
@@ -73,14 +72,7 @@ export default function Main() {
             </Grid>
 
             <Grid container item xs={ 12 } lg={ 10 } xl={ 7 } className={ classes.col2 }>
-              <Grid container alignItems="flex-end">
-                <Grid item xs>
-                  <Switch />
-                </Grid>
-              </Grid>
-              <Grid item xs={ 12 }>
                 <TableContainer />
-              </Grid>
             </Grid>
 
             <Grid item xs={ 12 } sm xl={ 5 } className={ classes.col3 }>

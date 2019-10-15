@@ -95,6 +95,7 @@ export default function Table() {
         errorText={ state.market.error }
         colWidth={ colWidth }
         group={ group }
+        showPercent={state.showPercent}
       />
     );
   };

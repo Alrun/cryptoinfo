@@ -7,6 +7,7 @@ export const initialState = {
   sortDesc: false,
   tableData: [],
   groupOpenAll: !localStorage.groupOpenAll ? false : JSON.parse(localStorage.groupOpenAll),
+  showPercent: !localStorage.showPercent ? true : JSON.parse(localStorage.showPercent),
   groupOpen: [],
   spreadsheet: {
     link: '',
@@ -141,6 +142,12 @@ export const reducer = (state = initialState, action) => {
         groupOpen: action.bool
                    ? state.groupOpen
                    : []
+      };
+
+    case C.SHOW_PERCENT:
+      return {
+        ...state,
+        showPercent: action.bool
       };
 
     default:

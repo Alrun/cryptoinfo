@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function TableRow(props) {
   const {title, buyPrice, price, quantity, buyFee, sellFee, wallet, profit, gain, val} = props.data;
-  const {isLoading, errorText, fiat, fiatSymbol, colWidth, group} = props;
+  const {isLoading, errorText, fiat, fiatSymbol, colWidth, group, showPercent} = props;
   const classes = useStyles();
 
   return (
@@ -135,8 +135,10 @@ export default function TableRow(props) {
       >
         {
           !Number.isNaN(gain)
-          ? gain < -50
-            ? `${ +(profit / val - 1).toFixed(1) }x`
+          ? !showPercent
+            ? gain < -50
+              ? `${ +(profit / val - 1).toFixed(1) }x`
+              : `${ +(profit / val).toFixed(1) }x`
             : `${ gain.toFixed(2) }%`
           : 'N/A'
         }

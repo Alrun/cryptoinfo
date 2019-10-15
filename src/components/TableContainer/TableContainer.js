@@ -10,8 +10,12 @@ import {
   marketFetchSuccess,
   marketLoading,
   marketError,
-  setTableData
+  setTableData,
+  groupOpenAll,
+  showPercent
 } from '../../context/actions';
+import Grid from '@material-ui/core/Grid';
+import Switch from '../Switch/Switch';
 
 export const DEMO_SPREADSHEET = '1paG7wL-ZRiAHvU6QcvtISVX2ROP8NTcvslQETh8ZdRQ';
 const DEMO_KEY = 'DX8Js7mGTjkscOevUm0IpubG0nMWuO';
@@ -19,11 +23,21 @@ const DEMO_KEY = 'DX8Js7mGTjkscOevUm0IpubG0nMWuO';
 export default function TableContainer() {
   const {state, dispatch} = useContext(StoreContext);
 
+  const handleGroupToggle = () => () => {
+    dispatch(groupOpenAll(!state.groupOpenAll));
+    localStorage.groupOpenAll = !state.groupOpenAll;
+  };
+
+  const handlePercentToggle = () => () => {
+    dispatch(showPercent(!state.showPercent));
+    localStorage.showPercent = !state.showPercent;
+  };
+
   const getSpreadsheetData = useCallback((link) => {
     const schemaSpreadsheet = data => data.map(item => ({
       title: item.gsx$title.$t.toUpperCase(),
       buyPrice: parseFloat(item.gsx$price.$t.replace(',', '.')),
-      quantity: parseFloat(item.gsx$quantity.$t.replace(',', '.')),
+      quantity: parseFloat(item.gsx$quantity.$t.replace(/\s+/g, '').replace(',', '.')),
       buyFee: parseFloat(item.gsx$buyfee.$t.replace(',', '.')),
       sellFee: parseFloat(item.gsx$sellfee.$t.replace(',', '.')),
       wallet: item.gsx$wallet.$t
@@ -312,6 +326,26 @@ export default function TableContainer() {
   ]);
 
   return (
-    <Table />
+    <>
+      <Grid container alignItems="flex-end">
+        <Grid item xs="auto">
+          <Switch
+            checked={state.groupOpenAll}
+            label="Expand all"
+            handleChange={handleGroupToggle}
+          />
+        </Grid>
+        <Grid item xs>
+          <Switch
+            checked={state.showPercent}
+            label="Percent"
+            handleChange={handlePercentToggle}
+          />
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Table />
+      </Grid>
+    </>
   );
 }

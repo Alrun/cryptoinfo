@@ -10,7 +10,8 @@ export const C = {
   SET_TABLE_DATA: 'SET_TABLE_DATA',
   SET_CURRENCY: 'SET_CURRENCY',
   GROUP_OPEN_TOGGLE: 'GROUP_OPEN_TOGGLE',
-  GROUP_OPEN_ALL: 'GROUP_OPEN_ALL'
+  GROUP_OPEN_ALL: 'GROUP_OPEN_ALL',
+  SHOW_PERCENT: 'SHOW_PERCENT'
 };
 
 export const setSpreadsheetLink = link => ({
@@ -70,5 +71,10 @@ export const groupOpenToggle = id => ({
 
 export const groupOpenAll = bool => ({
   type: C.GROUP_OPEN_ALL,
+  bool
+});
+
+export const showPercent = bool => ({
+  type: C.SHOW_PERCENT,
   bool
 });
