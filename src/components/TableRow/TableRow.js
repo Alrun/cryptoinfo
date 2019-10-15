@@ -55,7 +55,8 @@ export default function TableRow(props) {
 
   return (
     <>
-      <Box fontWeight={group ? 'fontWeightMedium' : 'fontWeightRegular'} className={ classes.col } style={ {width: colWidth.col1} }>
+      <Box fontWeight={ group ? 'fontWeightMedium' : 'fontWeightRegular' } className={ classes.col }
+           style={ {width: colWidth.col1} }>
         { title }
       </Box>
 
@@ -95,7 +96,7 @@ export default function TableRow(props) {
 
         { isLoading
         && <Box className={ classes.preloader }>
-          <CircularProgress className={ classes.progress } size={ 16 } disableShrink thickness={5}/>
+          <CircularProgress className={ classes.progress } size={ 16 } disableShrink thickness={ 5 } />
         </Box> }
 
         <Box className={ `${ classes.load } ${ isLoading ? classes.loadActive : null }` }>
@@ -130,11 +131,13 @@ export default function TableRow(props) {
       <Box
         color={ Number.isNaN(gain) ? 'text.primary' : gain < 0 ? 'red' : 'green' }
         className={ classes.col }
-        style={ {width: colWidth.col6, textAlign: 'right'}
-        }>
+        style={ {width: colWidth.col6, textAlign: 'right'} }
+      >
         {
           !Number.isNaN(gain)
-          ? `${ gain.toFixed(2) }%`
+          ? gain < -50
+            ? `${ +(profit / val - 1).toFixed(1) }x`
+            : `${ gain.toFixed(2) }%`
           : 'N/A'
         }
       </Box>
