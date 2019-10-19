@@ -11,8 +11,7 @@ import {
   marketLoading,
   marketError,
   setTableData,
-  groupOpenAll,
-  showPercent
+  groupOpenAll
 } from '../../context/actions';
 import Grid from '@material-ui/core/Grid';
 import Switch from '../Switch/Switch';
@@ -26,11 +25,6 @@ export default function TableContainer() {
   const handleGroupToggle = () => () => {
     dispatch(groupOpenAll(!state.groupOpenAll));
     localStorage.groupOpenAll = !state.groupOpenAll;
-  };
-
-  const handlePercentToggle = () => () => {
-    dispatch(showPercent(!state.showPercent));
-    localStorage.showPercent = !state.showPercent;
   };
 
   const getSpreadsheetData = useCallback((link) => {
@@ -128,11 +122,11 @@ export default function TableContainer() {
 
     const rawDataExtended = rawData.map(item => {
       const calcProfit = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
-        return priceSell * quantity - priceBuy * quantity - (quantity / 100 * buyFee + quantity) / 100 * buyFee * priceBuy - quantity / 100 * sellFee * priceSell;
+        return (priceSell * quantity - priceSell * quantity / 100 * sellFee) - (priceBuy * quantity + priceBuy * quantity / 100 * buyFee);
       };
 
-      const calcGain = (priceSell, priceBuy, quantity) => {
-        return (priceSell * quantity - priceBuy * quantity) * 100 / (priceBuy * quantity);
+      const calcGain = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
+        return (calcProfit(priceSell, priceBuy, quantity, buyFee, sellFee)) * 100 / (priceSell * quantity);
       };
 
       return {
@@ -159,11 +153,11 @@ export default function TableContainer() {
                 : NaN,
         gain: state.fiat === 'btc'
               ? item.title.toLowerCase() === 'btc'
-                ? calcGain(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity)
-                : calcGain(item.price / state.market.priceBtc, item.buyPrice, item.quantity)
+                ? calcGain(item.price / state.market.priceBtc, item.buyPrice / state.market.priceBtc, item.quantity, item.buyFee, item.sellFee)
+                : calcGain(item.price / state.market.priceBtc, item.buyPrice, item.quantity, item.buyFee, item.sellFee)
               : item.title.toLowerCase() === 'btc'
-                ? calcGain(item.price, item.buyPrice * state.market.priceUsdt, item.quantity)
-                : calcGain(item.price, item.buyPrice * state.market.priceBtc, item.quantity),
+                ? calcGain(item.price, item.buyPrice * state.market.priceUsdt, item.quantity, item.buyFee, item.sellFee)
+                : calcGain(item.price, item.buyPrice * state.market.priceBtc, item.quantity, item.buyFee, item.sellFee),
         val: state.market.priceBtc
              ? state.fiat === 'btc'
                ? item.price / state.market.priceBtc * item.quantity
@@ -200,6 +194,7 @@ export default function TableContainer() {
       if (currencyListWCount.hasOwnProperty(key)) {
         if (currencyListWCount[key] > 1) {
           let groupArr = [];
+          let groupLabel = '';
           let sum = {
             quantity: 0,
             buyPrice: 0,
@@ -210,6 +205,7 @@ export default function TableContainer() {
 
           rawDataExtended.forEach(item => {
             if (item.title === key) {
+              groupLabel = item.label;
               groupArr.push(item);
               sum.buyPrice += (item.buyPrice || 0) * item.quantity;
               sum.quantity += item.quantity;
@@ -238,6 +234,7 @@ export default function TableContainer() {
 
           tableArr.push({
             title: key,
+            label: groupLabel,
             buyPrice: sum.buyPrice / sum.quantity,
             quantity: sum.quantity,
             val: sum.val,
@@ -247,7 +244,7 @@ export default function TableContainer() {
                      : market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price
                    : NaN,
             profit: sum.profit,
-            gain: sum.gain / sum.quantity,
+            gain: sum.profit * 100 / sum.val,
             wallet: walletList.join(', '),
             group: sortTableRows(groupArr, state.sortBy, state.sortDesc)
           });
@@ -296,16 +293,7 @@ export default function TableContainer() {
 
   useEffect(() => {
     if (state.spreadsheet.data.length && state.market.data.length) {
-
-      /**
-       * Todo [...new Set(array)] - only uniq values
-       */
-      const ssList = state.spreadsheet.data.reduce((acc, cur) => {
-        if (!acc.includes(cur.title)) {
-          acc.push(cur.title);
-        }
-        return acc;
-      }, ['USDT', 'BTC']);
+      const ssList = [ ...new Set([...state.spreadsheet.data.map(item => item.title), 'USDT', 'BTC'])];
       const mList = state.market.data.reduce((acc, cur) => {
         if (!acc.includes(cur.label.match(/.*(?=\/)/).join())) {
           acc.push(cur.label.match(/.*(?=\/)/).join());
@@ -333,13 +321,6 @@ export default function TableContainer() {
             checked={state.groupOpenAll}
             label="Expand all"
             handleChange={handleGroupToggle}
-          />
-        </Grid>
-        <Grid item xs>
-          <Switch
-            checked={state.showPercent}
-            label="Percent"
-            handleChange={handlePercentToggle}
           />
         </Grid>
       </Grid>

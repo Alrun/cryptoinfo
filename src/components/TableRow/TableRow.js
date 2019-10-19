@@ -8,6 +8,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { decimalFormat } from '../../utils';
+import withStyles from '@material-ui/core/styles/withStyles';
 
 const useStyles = makeStyles(theme => ({
   col: {
@@ -48,16 +49,31 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const LightTooltip = withStyles(theme => ({
+  tooltip: {
+    backgroundColor: theme.palette.common.white,
+    color: 'rgba(0, 0, 0, 0.87)',
+    boxShadow: theme.shadows[2],
+    fontSize: theme.typography.fontSize,
+    fontWeight: theme.typography.fontWeightRegular
+  },
+}))(Tooltip);
+
 export default function TableRow(props) {
-  const {title, buyPrice, price, quantity, buyFee, sellFee, wallet, profit, gain, val} = props.data;
-  const {isLoading, errorText, fiat, fiatSymbol, colWidth, group, showPercent} = props;
+  const {title, label, buyPrice, price, quantity, buyFee, sellFee, wallet, profit, gain, val} = props.data;
+  const {isLoading, errorText, fiat, fiatSymbol, colWidth, group} = props;
   const classes = useStyles();
 
   return (
     <>
       <Box fontWeight={ group ? 'fontWeightMedium' : 'fontWeightRegular' } className={ classes.col }
            style={ {width: colWidth.col1} }>
-        { title }
+        <LightTooltip
+          placement="right"
+          title={label}
+        >
+          <span>{ title }</span>
+        </LightTooltip>
       </Box>
 
       <Box
@@ -135,11 +151,7 @@ export default function TableRow(props) {
       >
         {
           !Number.isNaN(gain)
-          ? !showPercent
-            ? gain < -50
-              ? `${ +(profit / val - 1).toFixed(1) }x`
-              : `${ +(profit / val).toFixed(1) }x`
-            : `${ gain.toFixed(2) }%`
+          ? `${ gain.toFixed(2) }%`
           : 'N/A'
         }
       </Box>
