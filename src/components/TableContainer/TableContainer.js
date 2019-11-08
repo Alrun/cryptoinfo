@@ -43,7 +43,9 @@ export default function TableContainer() {
       try {
         const response = await axios.get(`https://spreadsheets.google.com/feeds/list/${ link }/od6/public/values?alt=json`);
         const spreadsheetData = schemaSpreadsheet(response.data.feed.entry);
+
         dispatch(spreadsheetFetchSuccess(spreadsheetData));
+
         if (link !== DEMO_SPREADSHEET) localStorage.spreadSheetLink = link;
       } catch (err) {
         dispatch(spreadsheetError(err.message));
@@ -84,7 +86,9 @@ export default function TableContainer() {
         const response = await axios.get(`https://www.worldcoinindex.com/apiservice/ticker?key=${ DEMO_KEY }&label=${ coinList }&fiat=${ fiat }`);
 
         if (!!response.data.Markets) {
-          dispatch(marketFetchSuccess(schemaMarket(response.data.Markets)));
+          const dataWODeadCoins = response.data.Markets.filter(item => item.Name !== 'Harvestmasternode');
+
+          dispatch(marketFetchSuccess(schemaMarket(dataWODeadCoins)));
         } else {
           dispatch(marketFetchSuccess(
             coinList.split('-').map(item => (
@@ -303,6 +307,8 @@ export default function TableContainer() {
 
       if (mList.length === ssList.length) {
         compileTableData(state.spreadsheet.data, state.market.data);
+      } else {
+        console.error(`mList {${mList.length}} !== ssList {${ssList.length}}`)
       }
     }
   }, [
