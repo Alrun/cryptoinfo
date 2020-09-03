@@ -19,6 +19,14 @@ import Switch from '../Switch/Switch';
 export const DEMO_SPREADSHEET = '1paG7wL-ZRiAHvU6QcvtISVX2ROP8NTcvslQETh8ZdRQ';
 const DEMO_KEY = 'DX8Js7mGTjkscOevUm0IpubG0nMWuO';
 
+export const calcProfit = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
+    return (priceSell * quantity - priceSell * quantity / 100 * sellFee) - (priceBuy * quantity + priceBuy * quantity / 100 * buyFee);
+};
+
+export const calcGain = (priceSell, priceBuy, quantity) => {
+    return (priceSell * quantity - priceBuy * quantity) * 100 / (priceBuy * quantity);
+};
+
 export default function TableContainer() {
   const {state, dispatch} = useContext(StoreContext);
 
@@ -125,13 +133,6 @@ export default function TableContainer() {
     });
 
     const rawDataExtended = rawData.map(item => {
-      const calcProfit = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
-        return (priceSell * quantity - priceSell * quantity / 100 * sellFee) - (priceBuy * quantity + priceBuy * quantity / 100 * buyFee);
-      };
-
-      const calcGain = (priceSell, priceBuy, quantity, buyFee, sellFee) => {
-        return (calcProfit(priceSell, priceBuy, quantity, buyFee, sellFee)) * 100 / (priceSell * quantity);
-      };
 
       return {
         ...item,
@@ -248,7 +249,7 @@ export default function TableContainer() {
                      : market.filter(i => i.label.match(/.*(?=\/)/).join().toLowerCase() === key.toLowerCase())[0].price
                    : NaN,
             profit: sum.profit,
-            gain: sum.profit * 100 / sum.val,
+            gain: (sum.profit * 100) / (sum.buyPrice / sum.quantity * sum.quantity),
             wallet: walletList.join(', '),
             group: sortTableRows(groupArr, state.sortBy, state.sortDesc)
           });

@@ -78,9 +78,9 @@ export default function SelectCurrency() {
               offset: {
                 offset: '0, 1px'
               },
-              computeStyle: {
-                y: "'right'",
-              },
+              // computeStyle: {
+              //   y: "'right'",
+              // },
             }}
           >
             { ({TransitionProps}) => (
