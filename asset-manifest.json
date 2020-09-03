@@ -1,13 +1,19 @@
 {
   "files": {
-    "main.js": "/cryptoinfo/static/js/main.2d2b8ef5.chunk.js",
-    "main.js.map": "/cryptoinfo/static/js/main.2d2b8ef5.chunk.js.map",
-    "runtime-main.js": "/cryptoinfo/static/js/runtime-main.48a6182d.js",
-    "runtime-main.js.map": "/cryptoinfo/static/js/runtime-main.48a6182d.js.map",
-    "static/js/2.c8970cba.chunk.js": "/cryptoinfo/static/js/2.c8970cba.chunk.js",
-    "static/js/2.c8970cba.chunk.js.map": "/cryptoinfo/static/js/2.c8970cba.chunk.js.map",
+    "main.js": "/cryptoinfo/static/js/main.4e3817d4.chunk.js",
+    "main.js.map": "/cryptoinfo/static/js/main.4e3817d4.chunk.js.map",
+    "runtime-main.js": "/cryptoinfo/static/js/runtime-main.c3363f89.js",
+    "runtime-main.js.map": "/cryptoinfo/static/js/runtime-main.c3363f89.js.map",
+    "static/js/2.35f3a81c.chunk.js": "/cryptoinfo/static/js/2.35f3a81c.chunk.js",
+    "static/js/2.35f3a81c.chunk.js.map": "/cryptoinfo/static/js/2.35f3a81c.chunk.js.map",
     "index.html": "/cryptoinfo/index.html",
-    "precache-manifest.bd10dbbfea3ee0fee5cdeb8cd9ac4865.js": "/cryptoinfo/precache-manifest.bd10dbbfea3ee0fee5cdeb8cd9ac4865.js",
-    "service-worker.js": "/cryptoinfo/service-worker.js"
-  }
+    "precache-manifest.6248b32aad59abceecbf01f86a3cd74d.js": "/cryptoinfo/precache-manifest.6248b32aad59abceecbf01f86a3cd74d.js",
+    "service-worker.js": "/cryptoinfo/service-worker.js",
+    "static/js/2.35f3a81c.chunk.js.LICENSE.txt": "/cryptoinfo/static/js/2.35f3a81c.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c3363f89.js",
+    "static/js/2.35f3a81c.chunk.js",
+    "static/js/main.4e3817d4.chunk.js"
+  ]
 }
